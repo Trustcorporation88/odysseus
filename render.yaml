@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: odysseus
+    runtime: python
+    buildCommand: pip install -r requirements.txt && python setup.py
+    startCommand: python -m uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: AUTH_ENABLED
+        value: "true"
+      - key: ODYSSEUS_ADMIN_USER
+        value: admin
+      - key: ODYSSEUS_ADMIN_PASSWORD
+        value: hermes2026
+      - key: LLM_HOST
+        value: https://api.deepseek.com/v1
+      - key: OPENAI_API_KEY
+        value: fe_oa_e4238dc8ccba544b0778cf4dfd45718b92445b9c049045cc
+      - key: OPENAI_BASE_URL
+        value: https://api.freemodel.dev/v1
