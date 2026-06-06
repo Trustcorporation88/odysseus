@@ -734,7 +734,7 @@ def _serve_html_with_nonce(request: Request, file_path: str) -> HTMLResponse:
         html = f.read()
     nonce = getattr(request.state, "csp_nonce", "")
     html = html.replace("{{CSP_NONCE}}", nonce)
-    return HTMLResponse(html)
+    return HTMLResponse(html, headers={"Cache-Control": "no-cache"})
 
 @app.get("/")
 async def serve_index(request: Request):

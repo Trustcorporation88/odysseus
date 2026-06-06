@@ -33,6 +33,7 @@ from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
+from core.constants import SSE_STREAM_HEADERS
 from core.platform_compat import (
     IS_WINDOWS,
     detached_popen_kwargs,
@@ -765,7 +766,11 @@ def setup_shell_routes() -> APIRouter:
             async def empty():
                 yield f"data: {json.dumps({'stream': 'stderr', 'data': 'No command provided'})}\n\n"
                 yield f"data: {json.dumps({'exit_code': 1})}\n\n"
-            return StreamingResponse(empty(), media_type="text/event-stream")
+            return StreamingResponse(
+                empty(),
+                media_type="text/event-stream",
+                headers=SSE_STREAM_HEADERS,
+            )
 
         timeout = req.timeout if req.timeout is not None else STREAM_TIMEOUT
         use_pty = req.use_pty
@@ -782,12 +787,17 @@ def setup_shell_routes() -> APIRouter:
             # tmux is POSIX-only; Windows uses a detached-process + logfile tail
             # that preserves the "survives disconnect" behaviour.
             gen = _generate_win_detached(cmd, request) if IS_WINDOWS else _generate_tmux(cmd, request)
-            return StreamingResponse(gen, media_type="text/event-stream")
+            return StreamingResponse(
+                gen,
+                media_type="text/event-stream",
+                headers=SSE_STREAM_HEADERS,
+            )
 
         if use_pty and not IS_WINDOWS:
             return StreamingResponse(
                 _generate_pty(cmd, timeout, request),
                 media_type="text/event-stream",
+                headers=SSE_STREAM_HEADERS,
             )
         # Windows has no PTY; fall through to pipe streaming below (output still
         # streams line-by-line, just without live in-place progress-bar redraws).
@@ -877,7 +887,11 @@ def setup_shell_routes() -> APIRouter:
                 for t in reader_tasks:
                     t.cancel()
 
-        return StreamingResponse(generate(), media_type="text/event-stream")
+        return StreamingResponse(
+            generate(),
+            media_type="text/event-stream",
+            headers=SSE_STREAM_HEADERS,
+        )
 
     @router.get("/api/cookbook/packages")
     async def list_packages(request: Request, host: str | None = None, ssh_port: str | None = None, venv: str | None = None):

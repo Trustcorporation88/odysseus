@@ -1164,3 +1164,30 @@ def test_visual_report_escapes_request_category():
     # value must coerce rather than crash the render (html.escape needs a str).
     out = generate_visual_report(question="q", report_markdown="## H", category=12345)
     assert "category-12345" in out
+
+
+def test_sse_stream_endpoints_disable_proxy_buffering():
+    """SSE routes must opt out of reverse-proxy buffering so live UI updates work."""
+    from core.constants import SSE_STREAM_HEADERS
+
+    assert SSE_STREAM_HEADERS["Cache-Control"] == "no-cache"
+    assert SSE_STREAM_HEADERS["X-Accel-Buffering"] == "no"
+
+    for rel in (
+        "routes/chat_routes.py",
+        "routes/model_routes.py",
+        "routes/shell_routes.py",
+        "routes/research_routes.py",
+    ):
+        text = Path(rel).read_text(encoding="utf-8")
+        assert "headers=SSE_STREAM_HEADERS" in text, rel
+        assert 'media_type="text/event-stream"' in text, rel
+
+
+def test_html_shell_responses_are_not_long_cached():
+    app_src = Path("app.py").read_text(encoding="utf-8")
+    assert 'HTMLResponse(html, headers={"Cache-Control": "no-cache"})' in app_src
+
+    sw = Path("static/sw.js").read_text(encoding="utf-8")
+    assert "network-first for the SPA root" in sw
+    assert "odysseus-v327" in sw

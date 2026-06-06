@@ -12,6 +12,7 @@ from fastapi import APIRouter, Request, HTTPException, Form, Query
 from fastapi.responses import StreamingResponse
 from pydantic import ValidationError
 
+from core.constants import SSE_STREAM_HEADERS
 from core.models import ChatMessage
 from src.request_models import ChatRequest
 from src.llm_core import llm_call_async, stream_llm, stream_llm_with_fallback
@@ -1116,7 +1117,11 @@ def setup_chat_routes(
         # the SSE only removes a subscriber — the run keeps going and saves the
         # assistant message on completion regardless. Reconnect via /api/chat/resume.
         agent_runs.start(session, _safe_stream())
-        return StreamingResponse(agent_runs.subscribe(session), media_type="text/event-stream")
+        return StreamingResponse(
+            agent_runs.subscribe(session),
+            media_type="text/event-stream",
+            headers=SSE_STREAM_HEADERS,
+        )
 
     # ------------------------------------------------------------------ #
     # GET /api/chat/resume — reconnect to a detached run that's still going
@@ -1127,7 +1132,11 @@ def setup_chat_routes(
         _verify_session_owner(request, session_id)
         if not agent_runs.is_active(session_id):
             raise HTTPException(404, "No active run for this session")
-        return StreamingResponse(agent_runs.subscribe(session_id), media_type="text/event-stream")
+        return StreamingResponse(
+            agent_runs.subscribe(session_id),
+            media_type="text/event-stream",
+            headers=SSE_STREAM_HEADERS,
+        )
 
     # ------------------------------------------------------------------ #
     # POST /api/chat/stop — cancel a detached run (Stop button). Closing the SSE
@@ -1336,6 +1345,10 @@ def setup_chat_routes(
                 logger.error("Rewrite stream error: %s", e)
                 yield f'event: error\ndata: {json.dumps({"error": str(e), "status": 500})}\n\n'
 
-        return StreamingResponse(stream_rewrite(), media_type="text/event-stream")
+        return StreamingResponse(
+            stream_rewrite(),
+            media_type="text/event-stream",
+            headers=SSE_STREAM_HEADERS,
+        )
 
     return router

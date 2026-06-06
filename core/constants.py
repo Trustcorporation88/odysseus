@@ -38,3 +38,10 @@ CLEANUP_INTERVAL_HOURS = int(os.getenv("CLEANUP_INTERVAL_HOURS", "24"))
 # Default parameters
 DEFAULT_TEMPERATURE = 1.0
 DEFAULT_MAX_TOKENS = 0
+
+# SSE streams must disable proxy buffering (nginx/Render/etc.) so tokens
+# reach the browser incrementally instead of being held until stream end.
+SSE_STREAM_HEADERS = {
+    "Cache-Control": "no-cache",
+    "X-Accel-Buffering": "no",
+}

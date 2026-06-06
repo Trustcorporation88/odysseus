@@ -11,6 +11,8 @@ from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
+
+from core.constants import SSE_STREAM_HEADERS
 from pydantic import BaseModel, Field
 from src.endpoint_resolver import resolve_endpoint
 from src.auth_helpers import _auth_disabled, get_current_user
@@ -482,7 +484,7 @@ def setup_research_routes(research_handler, session_manager=None) -> APIRouter:
         return StreamingResponse(
             _generate(),
             media_type="text/event-stream",
-            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+            headers=SSE_STREAM_HEADERS,
         )
 
     @router.post("/api/research/result-peek/{session_id}")

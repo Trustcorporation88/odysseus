@@ -1,7 +1,7 @@
 // static/sw.js — Odysseus PWA Service Worker
 // Strategy:
-//   - HTML (navigation): stale-while-revalidate. Instant open from cache,
-//     background refresh so the next open has latest HTML.
+//   - HTML (navigation): network-first with cache fallback for offline.
+//     (Deploys show up on a normal reload; cached shell only when offline.)
 //   - JS/CSS (/static/*.js|.css): network-first, cache fallback for offline.
 //     (So code/style edits show up on a normal reload, no manual cache clear.)
 //   - Other static assets (images/fonts/libs): cache-first with bg refresh.
@@ -94,20 +94,17 @@ self.addEventListener('fetch', (e) => {
   // Never touch API calls or non-GET.
   if (url.pathname.startsWith('/api/') || e.request.method !== 'GET') return;
 
-  // HTML navigation: stale-while-revalidate the app shell — but ONLY for the
-  // SPA root. Other navigations (e.g. a deep-linked /static/*.html page) must
-  // go to the network/static handlers below; otherwise every navigation was
-  // served the app index, replacing the page the user actually asked for.
+  // HTML navigation: network-first for the SPA root — fetch latest shell on
+  // every load so deploys show up immediately; fall back to cache only offline.
   if (e.request.mode === 'navigate' && url.pathname === '/') {
     e.respondWith(
-      caches.open(CACHE_NAME).then(async cache => {
-        const cached = await cache.match('/');
-        const network = fetch(e.request).then(res => {
-          if (res && res.ok) cache.put('/', res.clone());
-          return res;
-        }).catch(() => cached);
-        return cached || network;
-      })
+      fetch(e.request).then(res => {
+        if (res && res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put('/', copy));
+        }
+        return res;
+      }).catch(() => caches.match('/'))
     );
     return;
   }

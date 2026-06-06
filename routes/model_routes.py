@@ -14,6 +14,7 @@ from urllib.parse import urlparse, urlunparse
 from fastapi import APIRouter, HTTPException, Form, Query, Body, Request, Response
 from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
+from core.constants import SSE_STREAM_HEADERS
 from core.database import SessionLocal, ModelEndpoint, Session as DbSession
 from core.middleware import require_admin
 from src.llm_core import _detect_provider, _host_match, ANTHROPIC_MODELS
@@ -1304,7 +1305,11 @@ def setup_model_routes(model_discovery):
         if not ep_data:
             def _empty():
                 yield f"data: {json.dumps({'type': 'probe_done', 'total': 0, 'ok': 0})}\n\n"
-            return StreamingResponse(_empty(), media_type="text/event-stream")
+            return StreamingResponse(
+                _empty(),
+                media_type="text/event-stream",
+                headers=SSE_STREAM_HEADERS,
+            )
 
         def _stream():
             total = 0
@@ -1342,7 +1347,11 @@ def setup_model_routes(model_discovery):
 
             yield f"data: {json.dumps({'type': 'probe_done', 'total': total, 'ok': ok_count})}\n\n"
 
-        return StreamingResponse(_stream(), media_type="text/event-stream")
+        return StreamingResponse(
+            _stream(),
+            media_type="text/event-stream",
+            headers=SSE_STREAM_HEADERS,
+        )
 
     # /api/providers runs a full host port-scan (discover_models) which can take
     # seconds when a configured LLM host is unreachable. It's fetched on every
@@ -1687,7 +1696,11 @@ def setup_model_routes(model_discovery):
 
             yield f"data: {json.dumps({'type': 'probe_done', 'total': len(all_models), 'ok': ok_count, 'hidden': len(failed)})}\n\n"
 
-        return StreamingResponse(_stream(), media_type="text/event-stream")
+        return StreamingResponse(
+            _stream(),
+            media_type="text/event-stream",
+            headers=SSE_STREAM_HEADERS,
+        )
 
     @router.get("/model-endpoints/{ep_id}/models")
     def list_endpoint_models(
