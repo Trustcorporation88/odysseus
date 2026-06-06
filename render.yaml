@@ -2,7 +2,7 @@ services:
   - type: web
     name: odysseus
     runtime: python
-    buildCommand: pip install -r requirements.txt && python setup.py
+    buildCommand: export ODYSSEUS_ADMIN_PASSWORD=hermes2026 && pip install -r requirements.txt && python setup.py
     startCommand: python -m uvicorn app:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
