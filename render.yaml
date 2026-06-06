@@ -3,7 +3,7 @@ services:
     name: odysseus
     runtime: python
     buildCommand: rm -f data/auth.json && export ODYSSEUS_ADMIN_PASSWORD=hermes2026 && pip install -r requirements.txt && python setup.py
-    startCommand: python -m uvicorn app:app --host 0.0.0.0 --port $PORT
+    startCommand: rm -f data/auth.json && export ODYSSEUS_ADMIN_PASSWORD=hermes2026 && python setup.py && python -m uvicorn app:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11
