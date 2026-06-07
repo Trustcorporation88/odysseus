@@ -149,9 +149,18 @@ function toggleLang() {
 }
 
 // Run on load and after mutations
-setTimeout(() => translate(document.body), 500);
-setTimeout(() => translate(document.body), 2000);
-setTimeout(() => translate(document.body), 5000);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => translate(document.body), 100);
+    setTimeout(() => translate(document.body), 1000);
+    setTimeout(() => translate(document.body), 3000);
+  });
+} else {
+  // DOM already loaded
+  setTimeout(() => translate(document.body), 100);
+  setTimeout(() => translate(document.body), 1000);
+  setTimeout(() => translate(document.body), 3000);
+}
 
 const observer = new MutationObserver(() => translate(document.body));
 observer.observe(document.body, { childList: true, subtree: true, characterData: true });
