@@ -1190,4 +1190,11 @@ def test_html_shell_responses_are_not_long_cached():
 
     sw = Path("static/sw.js").read_text(encoding="utf-8")
     assert "network-first for the SPA root" in sw
-    assert "odysseus-v327" in sw
+    assert "odysseus-v328" in sw
+
+
+def test_settings_i18n_module_has_portuguese():
+    js = Path("static/js/settings-i18n.js").read_text(encoding="utf-8")
+    assert "'pt-BR':" in js
+    assert "Configurações" in js
+    assert "set-uiLocale" in Path("static/index.html").read_text(encoding="utf-8")

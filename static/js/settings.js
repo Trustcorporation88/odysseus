@@ -7,6 +7,7 @@ import { makeWindowDraggable } from './windowDrag.js';
 import { clearDockSide } from './modalSnap.js';
 import { sortModelIds } from './modelSort.js';
 import { isAltGrEvent } from './platform.js';
+import { initSettingsI18n, applySettingsI18n } from './settings-i18n.js';
 
 let initialized = false;
 let modalEl = null;
@@ -2197,6 +2198,7 @@ function initAll() {
   initEmailAccountsSettings();
   initReminderSettings();
   initUnifiedIntegrations();
+  initSettingsI18n();
 }
 
 function notifyIntegrationsChanged() {
@@ -5054,6 +5056,7 @@ export function open(tab) {
   resetWindowPlacement();
   modalEl.classList.remove('hidden');
   syncAdminVisibility();
+  applySettingsI18n(modalEl);
   const content = modalEl.querySelector('.settings-modal-content');
   if (tab) {
     modalEl.querySelectorAll('[data-settings-tab]').forEach(b => b.classList.toggle('active', b.dataset.settingsTab === tab));
