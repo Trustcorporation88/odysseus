@@ -20,12 +20,19 @@ const PT = {
   "Documents": "Documentos",
   "Chat": "Chat",
   "Email": "Email",
+  "Tools": "Ferramentas",
+  "Agent": "Agente",
+  "Memories": "Memórias",
+  "Skills": "Habilidades",
+  "Browse": "Procurar",
+  "Latest": "Recentes",
+  "Trending": "Em alta",
   
   // Welcome
   "Welcome to Odysseus": "Bem-vindo ao Odysseus",
   "Start a new chat": "Iniciar novo chat",
   
-  // Cookbook (from image)
+  // Cookbook & Tabs
   "Download": "Baixar",
   "Serve": "Servir",
   "Dependencies": "Dependências",
@@ -63,18 +70,27 @@ const PT = {
   "Rename": "Renomear",
   "Confirm": "Confirmar",
   "Retry": "Tentar novamente",
+  "Back": "Voltar",
+  "Next": "Próximo",
+  "Previous": "Anterior",
+  "Generate": "Gerar",
+  "Continue": "Continuar",
+  "Submit": "Enviar",
+  "Done": "Feito",
   
   // Settings
   "General": "Geral",
   "Models": "Modelos",
   "Providers": "Provedores",
-  "API Keys": "Chaves API",
+  "API Keys": "Chaves de API",
   "Account": "Conta",
   "Password": "Senha",
   "Language": "Idioma",
   "Display": "Visual",
   "Notifications": "Notificações",
   "About": "Sobre",
+  "Appearance": "Aparência",
+  "Privacy": "Privacidade",
   
   // Email
   "Inbox": "Caixa de Entrada",
@@ -86,6 +102,8 @@ const PT = {
   "Compose": "Escrever",
   "Reply": "Responder",
   "Forward": "Encaminhar",
+  "Unread": "Não lido",
+  "Starred": "Marcado",
   
   // Calendar
   "Today": "Hoje",
@@ -95,6 +113,15 @@ const PT = {
   "Event": "Evento",
   "Add Event": "Adicionar Evento",
   "All Day": "Dia Inteiro",
+  "Time": "Horário",
+  "Location": "Local",
+  "Description": "Descrição",
+  
+  // Research & Comparison
+  "Results": "Resultados",
+  "Sources": "Fontes",
+  "Analysis": "Análise",
+  "Report": "Relatório",
   
   // Login
   "Login": "Entrar",
@@ -112,9 +139,11 @@ const PT = {
   "Yes": "Sim",
   "No": "Não",
   "OK": "OK",
-  "Back": "Voltar",
-  "Next": "Próximo",
-  "Previous": "Anterior",
+  "Processing": "Processando...",
+  "Try again": "Tentar novamente",
+  "Help": "Ajuda",
+  "Feedback": "Feedback",
+  "Documentation": "Documentação",
 };
 
 // Default to Portuguese (pt-BR) unless explicitly set to English
