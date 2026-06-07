@@ -117,8 +117,9 @@ const PT = {
   "Previous": "Anterior",
 };
 
+// Default to Portuguese (pt-BR) unless explicitly set to English
 let lang = localStorage.getItem('odysseus_lang') || 'pt-BR';
-let enabled = lang !== 'en-US';
+let enabled = true; // Always enabled by default
 
 function translate(el) {
   if (!enabled) return;
