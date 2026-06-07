@@ -150,11 +150,8 @@ const PT = {
 let lang = localStorage.getItem('odysseus_lang') || 'pt-BR';
 let enabled = true; // Always enabled by default
 
-console.log('[pt-BR] Language:', lang, '| Enabled:', enabled);
-
 function translate(el) {
   if (!enabled) return;
-  console.log('[pt-BR] Translating...');
   const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
   const nodes = [];
   while (walker.nextNode()) {
@@ -163,25 +160,28 @@ function translate(el) {
     if (!parent || parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE' || parent.tagName === 'INPUT' || parent.tagName === 'TEXTAREA' || parent.closest('[contenteditable]')) continue;
     nodes.push(node);
   }
-  let translated = 0;
+  
   for (const node of nodes) {
-    let text = node.textContent.trim();
+    let text = node.textContent;
+    let originalText = text;
+    
     for (const [en, pt] of Object.entries(PT)) {
-      // Exact match with trim
-      if (text === en) {
+      // Exact match first (after trim)
+      if (text.trim() === en) {
         node.textContent = pt;
-        translated++;
         break;
       }
-      // Partial match for text with surrounding whitespace
-      if (node.textContent.includes(en)) {
-        node.textContent = node.textContent.replace(en, pt);
-        translated++;
-        break;
+      // Only replace if it's a standalone word (with word boundaries)
+      const regex = new RegExp(`\\b${en}\\b`, 'g');
+      if (regex.test(text)) {
+        text = text.replace(regex, pt);
       }
     }
+    
+    if (text !== originalText) {
+      node.textContent = text;
+    }
   }
-  if (translated > 0) console.log('[pt-BR] Translated', translated, 'items');
 }
 
 function toggleLang() {
@@ -240,4 +240,4 @@ setTimeout(() => {
   setTimeout(() => { document.body.appendChild(btn); document.body.appendChild(modal); }, 2000);
 }, 2000);
 
-console.log('Odysseus pt-BR loaded. Double-click Settings gear or Ctrl+Shift+L to toggle.');
+  console.log('Odysseus pt-BR loaded.');
