@@ -8,9 +8,10 @@ Bem-vindo à documentação do Odysseus! Comece aqui para encontrar guias, tutor
 
 **Novo no Odysseus?** Comece aqui:
 
-1. **[INICIO_RAPIDO.md](./INICIO_RAPIDO.md)** — Pronto em 5 minutos
-2. **[GUIA_USUARIO.md](./GUIA_USUARIO.md)** — Visão geral completa de funcionalidades
-3. **[FAQ.md](./FAQ.md)** — Perguntas comuns respondidas
+1. **[COMO_USAR.md](./COMO_USAR.md)** ⭐ **LEIA PRIMEIRO!** — Guia prático com exemplos
+2. **[INICIO_RAPIDO.md](./INICIO_RAPIDO.md)** — Pronto em 5 minutos
+3. **[GUIA_USUARIO.md](./GUIA_USUARIO.md)** — Visão geral completa de funcionalidades
+4. **[FAQ.md](./FAQ.md)** — Perguntas comuns respondidas
 
 ---
 
@@ -18,6 +19,7 @@ Bem-vindo à documentação do Odysseus! Comece aqui para encontrar guias, tutor
 
 | Documento | Descrição |
 |---|---|
+| **COMO_USAR.md** ⭐ | Guia prático com exemplos — COMECE AQUI! |
 | **GUIA_USUARIO.md** | Guia completo com todos os serviços |
 | **INICIO_RAPIDO.md** | Setup rápido em 5 minutos |
 | **FAQ.md** | Perguntas frequentes e respostas |
@@ -36,10 +38,11 @@ Bem-vindo à documentação do Odysseus! Comece aqui para encontrar guias, tutor
 
 ## 🎯 Caminhos de Aprendizado
 
-### Para Usuários
-1. Leia [INICIO_RAPIDO.md](./INICIO_RAPIDO.md)
-2. Explore [GUIA_USUARIO.md](./GUIA_USUARIO.md)
-3. Guarde [FAQ.md](./FAQ.md) como referência
+### Para Usuários (RECOMENDADO)
+1. **[COMO_USAR.md](./COMO_USAR.md)** ⭐ Leia primeiro — Guia com exemplos práticos
+2. Leia [INICIO_RAPIDO.md](./INICIO_RAPIDO.md) — Setup em 5 min
+3. Explore [GUIA_USUARIO.md](./GUIA_USUARIO.md) — Detalhes completos
+4. Guarde [FAQ.md](./FAQ.md) como referência
 
 ### Para Administradores
 1. Leia [README.md](../README.md) seção de deployment
