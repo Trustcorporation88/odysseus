@@ -121,8 +121,11 @@ const PT = {
 let lang = localStorage.getItem('odysseus_lang') || 'pt-BR';
 let enabled = true; // Always enabled by default
 
+console.log('[pt-BR] Language:', lang, '| Enabled:', enabled);
+
 function translate(el) {
   if (!enabled) return;
+  console.log('[pt-BR] Translating...');
   const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
   const nodes = [];
   while (walker.nextNode()) {
@@ -131,14 +134,25 @@ function translate(el) {
     if (!parent || parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE' || parent.tagName === 'INPUT' || parent.tagName === 'TEXTAREA' || parent.closest('[contenteditable]')) continue;
     nodes.push(node);
   }
+  let translated = 0;
   for (const node of nodes) {
+    let text = node.textContent.trim();
     for (const [en, pt] of Object.entries(PT)) {
-      if (node.textContent === en) {
+      // Exact match with trim
+      if (text === en) {
         node.textContent = pt;
+        translated++;
+        break;
+      }
+      // Partial match for text with surrounding whitespace
+      if (node.textContent.includes(en)) {
+        node.textContent = node.textContent.replace(en, pt);
+        translated++;
         break;
       }
     }
   }
+  if (translated > 0) console.log('[pt-BR] Translated', translated, 'items');
 }
 
 function toggleLang() {
@@ -162,7 +176,11 @@ if (document.readyState === 'loading') {
   setTimeout(() => translate(document.body), 3000);
 }
 
-const observer = new MutationObserver(() => translate(document.body));
+const observer = new MutationObserver(() => {
+  clearTimeout(translationTimeout);
+  translationTimeout = setTimeout(() => translate(document.body), 50);
+});
+let translationTimeout;
 observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 
 // Add language toggle to settings gear
