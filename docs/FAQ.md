@@ -1,6 +1,6 @@
-# ❓ Odysseus FAQ
+# ❓ FAQ Odysseus
 
-Frequently asked questions and answers.
+Perguntas frequentes e respostas.
 
 ---
 
