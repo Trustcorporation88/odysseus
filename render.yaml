@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: odysseus
+    runtime: python
+    buildCommand: rm -f data/auth.json && pip install -r requirements.txt && python setup.py
+    startCommand: rm -f data/auth.json && python setup.py && python -m uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: AUTH_ENABLED
+        value: "true"
+      - key: ODYSSEUS_ADMIN_USER
+        value: admin
+      - key: ODYSSEUS_ADMIN_PASSWORD
+        fromVariable: ODYSSEUS_ADMIN_PASSWORD
+      - key: LLM_HOST
+        fromVariable: LLM_HOST
+      - key: OPENAI_API_KEY
+        fromVariable: OPENAI_API_KEY
+      - key: OPENAI_BASE_URL
+        fromVariable: OPENAI_BASE_URL
