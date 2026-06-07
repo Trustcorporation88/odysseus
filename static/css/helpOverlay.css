@@ -8,32 +8,33 @@
   align-items: center;
   justify-content: center;
   padding: 12px;
+  font-family: inherit;
 }
 
 .help-overlay-bg {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
   cursor: pointer;
   z-index: -1;
 }
 
 .help-overlay-modal {
   background: var(--bg, #1e1e1e);
-  border: 1px solid var(--border, #333);
-  border-radius: 12px;
-  padding: 24px;
+  border: 2px solid var(--brand-color, #7c3aed);
+  border-radius: 14px;
+  padding: 28px;
   width: 100%;
-  max-width: 550px;
+  max-width: 520px;
   max-height: 85vh;
   overflow-y: auto;
   color: var(--fg, #e0e0e0);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 25px 50px rgba(124, 58, 237, 0.15), 0 10px 30px rgba(0, 0, 0, 0.5);
   position: relative;
   opacity: 0;
-  transform: scale(0.95) translateY(20px);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: scale(0.92) translateY(30px);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
 }
 
 .help-overlay-modal.show {
@@ -42,153 +43,181 @@
 }
 
 .help-overlay-modal h2 {
-  margin: 0 0 8px 0;
-  font-size: 22px;
-  color: var(--brand-color, #7c3aed);
+  margin: 0 0 10px 0;
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--brand-color, #7c3aed), #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .help-overlay-modal > p {
-  margin: 0 0 18px 0;
-  color: var(--fg, #a0a0a0);
-  font-size: 13px;
-  line-height: 1.4;
+  margin: 0 0 20px 0;
+  color: var(--fg, #b0b0b0);
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 500;
 }
 
 .help-overlay-close {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background: none;
-  border: none;
-  color: var(--fg, #999);
-  font-size: 24px;
+  top: 14px;
+  right: 14px;
+  background: rgba(124, 58, 237, 0.1);
+  border: 1px solid var(--brand-color, #7c3aed);
+  color: var(--brand-color, #7c3aed);
+  font-size: 22px;
   cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.2s;
+  opacity: 0.8;
+  transition: all 0.2s;
   padding: 0;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 8px;
+  font-weight: bold;
 }
 
 .help-overlay-close:hover {
   opacity: 1;
+  background: var(--brand-color, #7c3aed);
+  color: white;
+  transform: scale(1.1);
 }
 
 /* Grid de ferramentas - RESPONSIVO */
 .help-tools-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(85px, 1fr));
-  gap: 10px;
-  margin: 18px 0;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 12px;
+  margin: 22px 0;
 }
 
 .help-tool {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px 8px;
-  background: var(--panel, #282c34);
-  border: 1px solid var(--border, #333);
-  border-radius: 6px;
+  padding: 12px 10px;
+  background: linear-gradient(135deg, var(--panel, #282c34), var(--border, #333));
+  border: 1.5px solid var(--border, #3a3f4a);
+  border-radius: 8px;
   text-align: center;
-  transition: all 0.2s;
+  transition: all 0.3s;
   cursor: pointer;
   min-width: 0;
-  word-break: break-word;
 }
 
 .help-tool:hover {
-  background: var(--border, #3a3f4a);
+  background: var(--brand-color, #7c3aed);
   border-color: var(--brand-color, #7c3aed);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(124, 58, 237, 0.3);
+}
+
+.help-tool:hover strong,
+.help-tool:hover small {
+  color: white;
 }
 
 .help-emoji {
-  font-size: 24px;
-  margin-bottom: 4px;
+  font-size: 26px;
+  margin-bottom: 6px;
   display: block;
   flex-shrink: 0;
 }
 
 .help-tool strong {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--fg, #e0e0e0);
   margin-bottom: 2px;
-  line-height: 1.2;
+  line-height: 1.3;
+  font-weight: 600;
+  transition: color 0.3s;
 }
 
 .help-tool small {
-  font-size: 9px;
-  color: var(--fg, #999);
+  font-size: 10px;
+  color: var(--fg, #888);
   line-height: 1.2;
+  transition: color 0.3s;
 }
 
 /* Botões de ação */
 .help-overlay-actions {
   display: flex;
-  gap: 8px;
-  margin-top: 16px;
+  gap: 10px;
+  margin-top: 22px;
   flex-wrap: wrap;
 }
 
 .help-btn-primary,
 .help-btn-secondary {
   flex: 1;
-  min-width: 100px;
-  padding: 9px 14px;
+  min-width: 110px;
+  padding: 10px 16px;
   border: none;
   border-radius: 6px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s;
+  text-align: center;
 }
 
 .help-btn-primary {
-  background: var(--brand-color, #7c3aed);
+  background: linear-gradient(135deg, var(--brand-color, #7c3aed), #9d4edd);
   color: white;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
 
 .help-btn-primary:hover {
-  background: var(--brand-color, #6d28d9);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
+}
+
+.help-btn-primary:active {
+  transform: translateY(0);
 }
 
 .help-btn-secondary {
   background: transparent;
   color: var(--brand-color, #7c3aed);
-  border: 1px solid var(--brand-color, #7c3aed);
+  border: 2px solid var(--brand-color, #7c3aed);
 }
 
 .help-btn-secondary:hover {
-  background: var(--brand-color, #7c3aed);
-  color: white;
+  background: rgba(124, 58, 237, 0.1);
+  transform: translateY(-2px);
+}
+
+.help-btn-secondary:active {
+  transform: translateY(0);
 }
 
 /* Footer */
 .help-overlay-footer {
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border, #333);
-  font-size: 11px;
-  color: var(--fg, #999);
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border, #3a3f4a);
+  font-size: 12px;
+  color: var(--fg, #888);
   text-align: center;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .help-overlay-footer strong {
   color: var(--brand-color, #7c3aed);
+  font-weight: 600;
 }
 
 /* Dark mode (se necessário) */
 @media (prefers-color-scheme: dark) {
   .help-overlay-modal {
-    background: #1a1a1a;
-    border-color: #333;
+    background: #0f0f0f;
+    border-color: #7c3aed;
   }
 }
 
@@ -199,40 +228,40 @@
   }
 
   .help-overlay-modal {
-    padding: 20px;
-    border-radius: 10px;
+    padding: 22px;
+    border-radius: 12px;
     max-height: 90vh;
   }
 
   .help-overlay-modal h2 {
-    font-size: 20px;
-    margin-bottom: 6px;
+    font-size: 22px;
+    margin-bottom: 8px;
   }
 
   .help-tools-grid {
-    grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
-    gap: 8px;
-    margin: 14px 0;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 10px;
+    margin: 18px 0;
   }
 
   .help-emoji {
-    font-size: 20px;
-    margin-bottom: 3px;
+    font-size: 24px;
+    margin-bottom: 4px;
   }
 
   .help-tool {
-    padding: 8px 6px;
+    padding: 10px 8px;
   }
 
   .help-overlay-actions {
-    gap: 6px;
-    margin-top: 12px;
+    gap: 8px;
+    margin-top: 18px;
   }
 
   .help-btn-primary,
   .help-btn-secondary {
-    min-width: 80px;
-    padding: 8px 12px;
+    min-width: 90px;
+    padding: 9px 14px;
     font-size: 12px;
   }
 }
@@ -244,67 +273,69 @@
   }
 
   .help-overlay-modal {
-    padding: 16px;
-    border-radius: 8px;
+    padding: 18px;
+    border-radius: 10px;
     max-height: 92vh;
   }
 
   .help-overlay-modal h2 {
-    font-size: 18px;
+    font-size: 20px;
   }
 
   .help-overlay-modal > p {
-    font-size: 12px;
-    margin-bottom: 12px;
+    font-size: 13px;
+    margin-bottom: 16px;
   }
 
   .help-overlay-close {
-    top: 8px;
-    right: 8px;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
   }
 
   .help-tools-grid {
-    grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
-    gap: 6px;
-    margin: 10px 0;
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: 8px;
+    margin: 14px 0;
   }
 
   .help-emoji {
-    font-size: 18px;
-    margin-bottom: 2px;
+    font-size: 22px;
+    margin-bottom: 3px;
   }
 
   .help-tool {
-    padding: 6px 4px;
-    border-radius: 4px;
+    padding: 8px 6px;
   }
 
   .help-tool strong {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .help-tool small {
-    font-size: 8px;
+    font-size: 9px;
   }
 
   .help-overlay-actions {
     flex-direction: column;
-    gap: 6px;
-    margin-top: 10px;
+    gap: 8px;
+    margin-top: 16px;
   }
 
   .help-btn-primary,
   .help-btn-secondary {
     width: 100%;
     min-width: unset;
-    padding: 8px 12px;
-    font-size: 12px;
+    padding: 10px 12px;
+    font-size: 13px;
   }
 
   .help-overlay-footer {
-    font-size: 10px;
-    margin-top: 10px;
-    padding-top: 10px;
+    font-size: 11px;
+    margin-top: 12px;
+    padding-top: 12px;
   }
 }
 

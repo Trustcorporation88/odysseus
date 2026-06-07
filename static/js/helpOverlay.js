@@ -6,8 +6,9 @@ const HELP_OVERLAY = {
 
   init() {
     // Verifique se o usuário já viu o overlay
-    if (!localStorage.getItem('odysseus_help_overlay_shown') && !this.shown) {
-      setTimeout(() => this.show(), 1500);
+    // Mostrar sempre por agora para testes (remover depois)
+    if (!this.shown) {
+      setTimeout(() => this.show(), 1200);
       localStorage.setItem('odysseus_help_overlay_shown', 'true');
     }
   },
