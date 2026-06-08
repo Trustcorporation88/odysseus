@@ -24,13 +24,20 @@ const PT = {
   "Agent": "Agente",
   "Memories": "Memórias",
   "Skills": "Habilidades",
-  "Browse": "Procurar",
+  "Browse": "Explorar",
   "Latest": "Recentes",
   "Trending": "Em alta",
+  "Archive": "Arquivo",
+  "Archived": "Arquivado",
   
   // Welcome
   "Welcome to Odysseus": "Bem-vindo ao Odysseus",
   "Start a new chat": "Iniciar novo chat",
+  "New session": "Nova sessão",
+  "Rename": "Renomear",
+  "Delete": "Excluir",
+  "Pin": "Fixar",
+  "Unpin": "Desafixar",
   
   // Cookbook & Tabs
   "Download": "Baixar",
@@ -51,12 +58,27 @@ const PT = {
   "Detected hardware": "Hardware detectado",
   "No GPU": "Sem GPU",
   "Search models...": "Buscar modelos...",
+  "Running": "Em execução",
+  "Stopped": "Parado",
+  "Start": "Iniciar",
+  "Stop": "Parar",
+  
+  // Chat input
+  "Message Odysseus...": "Mensagem para o Odysseus...",
+  "Type a message...": "Digite uma mensagem...",
+  "Send message": "Enviar mensagem",
+  "Attach file": "Anexar arquivo",
+  "Voice input": "Entrada de voz",
+  "Web search": "Busca na web",
+  "Regenerate": "Gerar novamente",
+  "Stop generating": "Parar geração",
+  "Copy message": "Copiar mensagem",
+  "Edit message": "Editar mensagem",
   
   // Actions
   "Send": "Enviar",
   "Save": "Salvar",
   "Cancel": "Cancelar", 
-  "Delete": "Excluir",
   "Close": "Fechar",
   "Edit": "Editar",
   "Copy": "Copiar",
@@ -67,7 +89,6 @@ const PT = {
   "Create": "Criar",
   "Add": "Adicionar",
   "Remove": "Remover",
-  "Rename": "Renomear",
   "Confirm": "Confirmar",
   "Retry": "Tentar novamente",
   "Back": "Voltar",
@@ -77,8 +98,19 @@ const PT = {
   "Continue": "Continuar",
   "Submit": "Enviar",
   "Done": "Feito",
+  "Open": "Abrir",
+  "Run": "Executar",
+  "Clear": "Limpar",
+  "Reset": "Redefinir",
+  "Share": "Compartilhar",
+  "Print": "Imprimir",
+  "Preview": "Prévia",
+  "Expand": "Expandir",
+  "Collapse": "Recolher",
+  "Minimize": "Minimizar",
+  "Maximize": "Maximizar",
   
-  // Settings
+  // Settings tabs
   "General": "Geral",
   "Models": "Modelos",
   "Providers": "Provedores",
@@ -91,37 +123,83 @@ const PT = {
   "About": "Sobre",
   "Appearance": "Aparência",
   "Privacy": "Privacidade",
+  "Security": "Segurança",
+  "Advanced": "Avançado",
+  "Integrations": "Integrações",
+  "Connections": "Conexões",
+  "API Key": "Chave de API",
+  "Save changes": "Salvar alterações",
+  "Test connection": "Testar conexão",
   
   // Email
   "Inbox": "Caixa de Entrada",
   "Sent": "Enviados",
   "Drafts": "Rascunhos",
-  "Archive": "Arquivo",
   "Spam": "Spam",
   "Trash": "Lixeira",
   "Compose": "Escrever",
   "Reply": "Responder",
+  "Reply All": "Responder a todos",
   "Forward": "Encaminhar",
   "Unread": "Não lido",
   "Starred": "Marcado",
+  "Mark as read": "Marcar como lido",
+  "Mark as unread": "Marcar como não lido",
+  "Move to": "Mover para",
+  "Search emails...": "Buscar emails...",
+  "No emails": "Sem emails",
+  "Loading emails...": "Carregando emails...",
   
   // Calendar
   "Today": "Hoje",
   "Week": "Semana",
   "Month": "Mês",
   "Year": "Ano",
+  "Day": "Dia",
   "Event": "Evento",
   "Add Event": "Adicionar Evento",
   "All Day": "Dia Inteiro",
   "Time": "Horário",
   "Location": "Local",
   "Description": "Descrição",
+  "No events": "Sem eventos",
+  "Sync": "Sincronizar",
   
   // Research & Comparison
   "Results": "Resultados",
   "Sources": "Fontes",
   "Analysis": "Análise",
   "Report": "Relatório",
+  "Research": "Pesquisa",
+  "Query": "Consulta",
+  "Summary": "Resumo",
+  "Model A": "Modelo A",
+  "Model B": "Modelo B",
+  "Add model": "Adicionar modelo",
+  "Vote": "Votar",
+  "Winner": "Vencedor",
+  
+  // Gallery
+  "Image generation": "Geração de imagens",
+  "Prompt": "Prompt",
+  "Style": "Estilo",
+  "Size": "Tamanho",
+  "Quality": "Qualidade",
+  "Generate image": "Gerar imagem",
+  "Gallery": "Galeria",
+  "Saved images": "Imagens salvas",
+  "No images": "Sem imagens",
+  
+  // Memory & Notes
+  "Add memory": "Adicionar memória",
+  "Search memories…": "Buscar memórias…",
+  "Search skills…": "Buscar habilidades…",
+  "No memories": "Sem memórias",
+  "New note": "Nova nota",
+  "Search notes...": "Buscar notas...",
+  "Due date": "Prazo",
+  "Reminder": "Lembrete",
+  "No notes": "Sem notas",
   
   // Login
   "Login": "Entrar",
@@ -129,13 +207,17 @@ const PT = {
   "Username": "Usuário",
   "Sign In": "Entrar",
   "Sign in": "Entrar",
+  "Sign out": "Sair",
   
   // Common
   "Loading...": "Carregando...",
+  "Loading": "Carregando",
   "No results": "Sem resultados",
   "Please wait": "Aguarde",
   "Error": "Erro",
   "Success": "Sucesso",
+  "Warning": "Aviso",
+  "Info": "Informação",
   "Yes": "Sim",
   "No": "Não",
   "OK": "OK",
@@ -144,6 +226,11 @@ const PT = {
   "Help": "Ajuda",
   "Feedback": "Feedback",
   "Documentation": "Documentação",
+  "Version": "Versão",
+  "Connecting...": "Conectando...",
+  "Connected": "Conectado",
+  "Disconnected": "Desconectado",
+  "Offline": "Offline",
 };
 
 // Default to Portuguese (pt-BR) unless explicitly set to English
@@ -152,6 +239,8 @@ let enabled = true; // Always enabled by default
 
 function translate(el) {
   if (!enabled) return;
+
+  // 1. Traduzir nós de texto visíveis
   const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
   const nodes = [];
   while (walker.nextNode()) {
@@ -166,12 +255,10 @@ function translate(el) {
     let originalText = text;
     
     for (const [en, pt] of Object.entries(PT)) {
-      // Exact match first (after trim)
       if (text.trim() === en) {
         node.textContent = pt;
         break;
       }
-      // Only replace if it's a standalone word (with word boundaries)
       const regex = new RegExp(`\\b${en}\\b`, 'g');
       if (regex.test(text)) {
         text = text.replace(regex, pt);
@@ -182,6 +269,20 @@ function translate(el) {
       node.textContent = text;
     }
   }
+
+  // 2. Traduzir atributos placeholder e title
+  el.querySelectorAll('[placeholder],[title],[aria-label]').forEach(elem => {
+    for (const attr of ['placeholder', 'title', 'aria-label']) {
+      const val = elem.getAttribute(attr);
+      if (!val) continue;
+      for (const [en, pt] of Object.entries(PT)) {
+        if (val.trim() === en) {
+          elem.setAttribute(attr, pt);
+          break;
+        }
+      }
+    }
+  });
 }
 
 function toggleLang() {

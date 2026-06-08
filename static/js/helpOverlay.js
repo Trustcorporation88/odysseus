@@ -92,7 +92,12 @@ window.HELP_OVERLAY = {
       'chat':     () => { window.location.hash = ''; },
       'search':   () => { document.getElementById('tool-research-btn')?.click(); },
       'document': () => { document.getElementById('overflow-doc-btn')?.click(); },
-      'email':    () => { window.location.href = '/email'; },
+      'email':    () => {
+        // Clicar no header do email na sidebar (sem reload)
+        const hdr = document.querySelector('#email-section .section-header-flex');
+        if (hdr) hdr.click();
+        else document.getElementById('rail-email')?.click();
+      },
       'calendar': () => { document.getElementById('tool-calendar-btn')?.click(); },
       'cookbook': () => { document.getElementById('tool-cookbook-btn')?.click(); },
       'compare':  () => { document.getElementById('tool-compare-btn')?.click(); },
