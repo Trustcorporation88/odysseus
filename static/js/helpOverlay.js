@@ -8,6 +8,8 @@ window.HELP_OVERLAY = {
     if (!this.shown) {
       setTimeout(() => this.show(), 1500);
     }
+    // Adicionar botão grid após a página carregar
+    setTimeout(() => this.addGridButton(), 2500);
   },
 
   show() {
@@ -101,6 +103,26 @@ window.HELP_OVERLAY = {
 
     const action = actions[tool];
     if (action) setTimeout(action, 200);
+  },
+
+  reopen() {
+    this.shown = false;
+    this.show();
+  },
+
+  addGridButton() {
+    if (document.getElementById('help-grid-btn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'help-grid-btn';
+    btn.title = 'Ver todos os serviços';
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <rect x="0" y="0" width="6" height="6" rx="1"/>
+      <rect x="10" y="0" width="6" height="6" rx="1"/>
+      <rect x="0" y="10" width="6" height="6" rx="1"/>
+      <rect x="10" y="10" width="6" height="6" rx="1"/>
+    </svg>`;
+    btn.addEventListener('click', () => this.reopen());
+    document.body.appendChild(btn);
   }
 };
 

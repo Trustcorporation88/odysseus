@@ -1,5 +1,36 @@
 /* Help Overlay Styling */
 
+/* Botão flutuante Grid */
+#help-grid-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9998;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--brand-color, #7c3aed);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.4);
+  transition: all 0.2s ease;
+  opacity: 0.85;
+}
+
+#help-grid-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 6px 24px rgba(124, 58, 237, 0.6);
+}
+
+#help-grid-btn:active {
+  transform: scale(0.95);
+}
+
 #help-overlay {
   position: fixed;
   inset: 0;
