@@ -28,52 +28,52 @@ const HELP_OVERLAY = {
         <p>Uma plataforma com 10 ferramentas de IA em um único lugar.</p>
         
         <div class="help-tools-grid">
-          <div class="help-tool">
+          <div class="help-tool" onclick="HELP_OVERLAY.navigate('chat')">
             <span class="help-emoji">💬</span>
             <strong>Chat</strong>
             <small>Conversa com IA</small>
           </div>
-          <div class="help-tool">
+          <div class="help-tool" onclick="HELP_OVERLAY.navigate('search')">
             <span class="help-emoji">🔍</span>
             <strong>Pesquisa</strong>
             <small>Busca na internet</small>
           </div>
-          <div class="help-tool">
+          <div class="help-tool" onclick="HELP_OVERLAY.navigate('document')">
             <span class="help-emoji">📄</span>
             <strong>Documentos</strong>
             <small>Editor com IA</small>
           </div>
-          <div class="help-tool">
+          <div class="help-tool" onclick="HELP_OVERLAY.navigate('email')">
             <span class="help-emoji">📧</span>
             <strong>Email</strong>
             <small>Gerenciar inbox</small>
           </div>
-          <div class="help-tool">
+          <div class="help-tool" onclick="HELP_OVERLAY.navigate('calendar')">
             <span class="help-emoji">📅</span>
             <strong>Calendário</strong>
             <small>Seus eventos</small>
           </div>
-          <div class="help-tool">
+          <div class="help-tool" onclick="HELP_OVERLAY.navigate('cookbook')">
             <span class="help-emoji">🍳</span>
             <strong>Catálogo</strong>
             <small>IA local</small>
           </div>
-          <div class="help-tool">
+          <div class="help-tool" onclick="HELP_OVERLAY.navigate('compare')">
             <span class="help-emoji">⚖️</span>
             <strong>Comparar</strong>
             <small>Teste modelos</small>
           </div>
-          <div class="help-tool">
+          <div class="help-tool" onclick="HELP_OVERLAY.navigate('gallery')">
             <span class="help-emoji">🎨</span>
             <strong>Galeria</strong>
             <small>Gerar imagens</small>
           </div>
-          <div class="help-tool">
+          <div class="help-tool" onclick="HELP_OVERLAY.navigate('memory')">
             <span class="help-emoji">💭</span>
             <strong>Memória</strong>
             <small>IA aprende sobre você</small>
           </div>
-          <div class="help-tool">
+          <div class="help-tool" onclick="HELP_OVERLAY.navigate('notes')">
             <span class="help-emoji">📝</span>
             <strong>Notas</strong>
             <small>Anotações</small>
@@ -113,8 +113,66 @@ const HELP_OVERLAY = {
     // Redireciona para a documentação
     window.location.hash = '#docs/COMO_USAR.md';
     this.close();
+  },
+
+  navigate(tool) {
+    // Fecha o overlay e navega para a ferramenta
+    this.close();
+    
+    // Mapeia cada ferramenta para seu botão ou rota
+    const toolMap = {
+      'chat': () => {
+        // Chat é a página principal — limpar hash
+        window.location.hash = '';
+      },
+      'search': () => {
+        // Pesquisa (research)
+        const btn = document.getElementById('tool-research-btn');
+        if (btn) btn.click();
+      },
+      'document': () => {
+        // Documentos
+        const btn = document.getElementById('overflow-doc-btn');
+        if (btn) btn.click();
+      },
+      'email': () => {
+        // Email route
+        window.location.pathname = '/email';
+      },
+      'calendar': () => {
+        // Calendário
+        window.location.pathname = '/calendar';
+      },
+      'cookbook': () => {
+        // Cookbook
+        const btn = document.getElementById('tool-cookbook-btn');
+        if (btn) btn.click();
+      },
+      'compare': () => {
+        // Comparar
+        const btn = document.getElementById('tool-compare-btn');
+        if (btn) btn.click();
+      },
+      'gallery': () => {
+        // Galeria
+        window.location.pathname = '/gallery';
+      },
+      'memory': () => {
+        // Memória
+        const btn = document.getElementById('tool-memory-btn');
+        if (btn) btn.click();
+      },
+      'notes': () => {
+        // Notas
+        window.location.pathname = '/notes';
+      }
+    };
+    
+    const action = toolMap[tool];
+    if (action && typeof action === 'function') {
+      setTimeout(action, 350); // Aguarda animação do overlay
+    }
   }
-};
 
 // Inicializar quando o DOM estiver pronto
 if (document.readyState === 'loading') {
