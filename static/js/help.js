@@ -333,11 +333,12 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 function showFeatureModal(featureName, help) {
   const modal = document.createElement('div');
+  modal.id = 'feature-modal-' + featureName;
   modal.className = 'feature-modal';
   modal.innerHTML = `
-    <div class="modal-overlay" onclick="this.parentElement.remove()"></div>
+    <div class="modal-overlay"></div>
     <div class="modal-content">
-      <button class="modal-close" onclick="this.parentElement.parentElement.remove()">✕</button>
+      <button class="modal-close">✕</button>
       <h2>${help.title}</h2>
       <p class="description">${help.description}</p>
       <div class="tips">
@@ -352,6 +353,16 @@ function showFeatureModal(featureName, help) {
     </div>
   `;
   document.body.appendChild(modal);
+  
+  // Fechar ao clicar no X
+  modal.querySelector('.modal-close').addEventListener('click', () => {
+    modal.remove();
+  });
+  
+  // Fechar ao clicar no overlay
+  modal.querySelector('.modal-overlay').addEventListener('click', () => {
+    modal.remove();
+  });
 }
 
 // Exportar para uso em outros módulos

@@ -5,11 +5,13 @@ const HELP_OVERLAY = {
   shown: false,
 
   init() {
-    // Verifique se o usuário já viu o overlay
-    // Mostrar sempre por agora para testes (remover depois)
+    // Mostrar overlay após a página carregar completamente
+    // Aguarda 1.5s para garantir que tudo está pronto
     if (!this.shown) {
-      setTimeout(() => this.show(), 1200);
-      localStorage.setItem('odysseus_help_overlay_shown', 'true');
+      const timer = setTimeout(() => {
+        console.log('[HELP_OVERLAY] Iniciando...');
+        this.show();
+      }, 1500);
     }
   },
 
@@ -17,12 +19,15 @@ const HELP_OVERLAY = {
     if (this.shown) return;
     this.shown = true;
 
+    console.log('[HELP_OVERLAY] Criando overlay...');
+
     const overlay = document.createElement('div');
     overlay.id = 'help-overlay';
+    overlay.className = 'help-overlay-visible'; // Classe para garantir visibilidade
     overlay.innerHTML = `
-      <div class="help-overlay-bg" onclick="HELP_OVERLAY.close()"></div>
+      <div class="help-overlay-bg"></div>
       <div class="help-overlay-modal">
-        <button class="help-overlay-close" onclick="HELP_OVERLAY.close()">✕</button>
+        <button class="help-overlay-close">✕</button>
         
         <h2>🚀 Bem-vindo ao Odysseus!</h2>
         <p>Uma plataforma com 10 ferramentas de IA em um único lugar.</p>
@@ -92,11 +97,27 @@ const HELP_OVERLAY = {
     `;
 
     document.body.appendChild(overlay);
+    console.log('[HELP_OVERLAY] Overlay adicionado ao DOM');
+
+    // Adicionar event listeners
+    const bg = overlay.querySelector('.help-overlay-bg');
+    const closeBtn = overlay.querySelector('.help-overlay-close');
+    
+    if (bg) {
+      bg.addEventListener('click', () => this.close());
+    }
+    
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => this.close());
+    }
 
     // Animar entrada
     setTimeout(() => {
       const modal = overlay.querySelector('.help-overlay-modal');
-      modal.classList.add('show');
+      if (modal) {
+        modal.classList.add('show');
+        console.log('[HELP_OVERLAY] Animação iniciada');
+      }
     }, 100);
   },
 
