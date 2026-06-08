@@ -234,10 +234,16 @@ setTimeout(() => {
   document.head.appendChild(style);
   const btn = document.createElement('button'); btn.className='od-help'; btn.textContent='?'; btn.title='Ajuda';
   const modal = document.createElement('div'); modal.className='od-modal'; modal.id='odModal';
-  modal.innerHTML = '<div class=od-modal-content><button class=od-close onclick=document.getElementById("odModal").classList.remove("open")>✕</button><h2>🧠 Odysseus — Guia</h2><h3>💬 Chat</h3><ul><li>Conversa com DeepSeek, Claude, Gemini</li><li>Suporta imagens (DALL-E) e documentos</li><li>Histórico salvo automaticamente</li></ul><h3>🔍 Deep Research</h3><ul><li>Pesquisa múltiplas fontes da web</li><li>Gera relatório visual completo</li><li>Ideal para análises e estudos</li></ul><h3>📄 Documentos</h3><ul><li>Editor de texto com AI assistindo</li><li>Markdown, HTML, CSV</li><li>Exporta PDF, Word, Excel</li></ul><h3>📧 Email</h3><ul><li>Lê emails (IMAP)</li><li>Classifica por urgência</li><li>Sugere respostas automáticas</li></ul><h3>📅 Calendário</h3><ul><li>Sincroniza Google/Apple/Nextcloud</li><li>Visão diária, semanal, mensal</li></ul><h3>🍳 Cookbook</h3><ul><li>Detecta GPU e recomenda modelos</li><li>Baixa e serve modelos automaticamente</li><li>Suporta Ollama, vLLM, llama.cpp</li></ul><h3>⚖️ Compare</h3><ul><li>Teste cego entre modelos</li><li>Compare respostas lado a lado</li></ul><h3>🎨 DESIGN.md</h3><ul><li>Crie sites com estilo profissional</li><li>Stripe, Apple, Nike, Spotify e mais</li><li>Arquivo na raiz do projeto</li></ul><h3>📐 Atalhos</h3><ul><li>Ctrl+Shift+L — Alternar idioma</li><li>Duplo clique no ⚙️ — Idioma</li></ul><p style="color:#7c3aed;margin-top:16px">Feito por TRUSTCORPORATION88</p></div>';
+  modal.innerHTML = '<div class=od-modal-content><button class=od-close id=odCloseBtn>✕</button><h2>🧠 Odysseus — Guia</h2><h3>💬 Chat</h3><ul><li>Conversa com DeepSeek, Claude, Gemini</li><li>Suporta imagens (DALL-E) e documentos</li><li>Histórico salvo automaticamente</li></ul><h3>🔍 Deep Research</h3><ul><li>Pesquisa múltiplas fontes da web</li><li>Gera relatório visual completo</li><li>Ideal para análises e estudos</li></ul><h3>📄 Documentos</h3><ul><li>Editor de texto com AI assistindo</li><li>Markdown, HTML, CSV</li><li>Exporta PDF, Word, Excel</li></ul><h3>📧 Email</h3><ul><li>Lê emails (IMAP)</li><li>Classifica por urgência</li><li>Sugere respostas automáticas</li></ul><h3>📅 Calendário</h3><ul><li>Sincroniza Google/Apple/Nextcloud</li><li>Visão diária, semanal, mensal</li></ul><h3>🍳 Cookbook</h3><ul><li>Detecta GPU e recomenda modelos</li><li>Baixa e serve modelos automaticamente</li><li>Suporta Ollama, vLLM, llama.cpp</li></ul><h3>⚖️ Compare</h3><ul><li>Teste cego entre modelos</li><li>Compare respostas lado a lado</li></ul><h3>🎨 Galeria</h3><ul><li>Geração de imagens com IA</li><li>DALL-E e outros provedores</li></ul><h3>💭 Memória</h3><ul><li>IA aprende sobre você</li><li>Preferências salvas entre sessões</li></ul><h3>📝 Notas</h3><ul><li>Anotações rápidas com IA</li><li>Lembretes e tarefas</li></ul><p style=color:#7c3aed;margin-top:16px>Feito por TRUSTCORPORATION88</p></div>';
   btn.onclick = () => modal.classList.toggle('open');
   modal.onclick = e => { if(e.target===modal) modal.classList.remove('open'); };
-  setTimeout(() => { document.body.appendChild(btn); document.body.appendChild(modal); }, 2000);
+  setTimeout(() => {
+    document.body.appendChild(btn);
+    document.body.appendChild(modal);
+    // Corrigir botão X — addEventListener em vez de onclick inline (aspas quebram HTML)
+    const closeBtn = document.getElementById('odCloseBtn');
+    if (closeBtn) closeBtn.addEventListener('click', () => modal.classList.remove('open'));
+  }, 2000);
 }, 2000);
 
   console.log('Odysseus pt-BR loaded.');

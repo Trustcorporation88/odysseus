@@ -195,6 +195,8 @@ const HELP_OVERLAY = {
     }
   }
 
+}; // fim HELP_OVERLAY
+
 // Inicializar quando o DOM estiver pronto
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => HELP_OVERLAY.init());
