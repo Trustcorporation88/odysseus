@@ -1,17 +1,12 @@
 // Overlay de instruções integrado ao Odysseus
-// Mostra um guia rápido quando o usuário abre pela primeira vez
+// Mostra um guia rápido quando o usuário abre
 
-const HELP_OVERLAY = {
+window.HELP_OVERLAY = {
   shown: false,
 
   init() {
-    // Mostrar overlay após a página carregar completamente
-    // Aguarda 1.5s para garantir que tudo está pronto
     if (!this.shown) {
-      const timer = setTimeout(() => {
-        console.log('[HELP_OVERLAY] Iniciando...');
-        this.show();
-      }, 1500);
+      setTimeout(() => this.show(), 1500);
     }
   },
 
@@ -19,187 +14,99 @@ const HELP_OVERLAY = {
     if (this.shown) return;
     this.shown = true;
 
-    console.log('[HELP_OVERLAY] Criando overlay...');
-
     const overlay = document.createElement('div');
     overlay.id = 'help-overlay';
-    overlay.className = 'help-overlay-visible'; // Classe para garantir visibilidade
+    overlay.className = 'help-overlay-visible';
+
+    const tools = [
+      { key: 'chat',     emoji: '💬', name: 'Chat',       desc: 'Conversa com IA' },
+      { key: 'search',   emoji: '🔍', name: 'Pesquisa',   desc: 'Busca na internet' },
+      { key: 'document', emoji: '📄', name: 'Documentos', desc: 'Editor com IA' },
+      { key: 'email',    emoji: '📧', name: 'Email',      desc: 'Gerenciar inbox' },
+      { key: 'calendar', emoji: '📅', name: 'Calendário', desc: 'Seus eventos' },
+      { key: 'cookbook', emoji: '🍳', name: 'Catálogo',   desc: 'IA local' },
+      { key: 'compare',  emoji: '⚖️', name: 'Comparar',   desc: 'Teste modelos' },
+      { key: 'gallery',  emoji: '🎨', name: 'Galeria',    desc: 'Gerar imagens' },
+      { key: 'memory',   emoji: '💭', name: 'Memória',    desc: 'IA aprende sobre você' },
+      { key: 'notes',    emoji: '📝', name: 'Notas',      desc: 'Anotações' },
+    ];
+
+    const gridHtml = tools.map(t => `
+      <div class="help-tool" data-tool="${t.key}">
+        <span class="help-emoji">${t.emoji}</span>
+        <strong>${t.name}</strong>
+        <small>${t.desc}</small>
+      </div>
+    `).join('');
+
     overlay.innerHTML = `
       <div class="help-overlay-bg"></div>
       <div class="help-overlay-modal">
         <button class="help-overlay-close">✕</button>
-        
         <h2>🚀 Bem-vindo ao Odysseus!</h2>
         <p>Uma plataforma com 10 ferramentas de IA em um único lugar.</p>
-        
-        <div class="help-tools-grid">
-          <div class="help-tool" onclick="HELP_OVERLAY.navigate('chat')">
-            <span class="help-emoji">💬</span>
-            <strong>Chat</strong>
-            <small>Conversa com IA</small>
-          </div>
-          <div class="help-tool" onclick="HELP_OVERLAY.navigate('search')">
-            <span class="help-emoji">🔍</span>
-            <strong>Pesquisa</strong>
-            <small>Busca na internet</small>
-          </div>
-          <div class="help-tool" onclick="HELP_OVERLAY.navigate('document')">
-            <span class="help-emoji">📄</span>
-            <strong>Documentos</strong>
-            <small>Editor com IA</small>
-          </div>
-          <div class="help-tool" onclick="HELP_OVERLAY.navigate('email')">
-            <span class="help-emoji">📧</span>
-            <strong>Email</strong>
-            <small>Gerenciar inbox</small>
-          </div>
-          <div class="help-tool" onclick="HELP_OVERLAY.navigate('calendar')">
-            <span class="help-emoji">📅</span>
-            <strong>Calendário</strong>
-            <small>Seus eventos</small>
-          </div>
-          <div class="help-tool" onclick="HELP_OVERLAY.navigate('cookbook')">
-            <span class="help-emoji">🍳</span>
-            <strong>Catálogo</strong>
-            <small>IA local</small>
-          </div>
-          <div class="help-tool" onclick="HELP_OVERLAY.navigate('compare')">
-            <span class="help-emoji">⚖️</span>
-            <strong>Comparar</strong>
-            <small>Teste modelos</small>
-          </div>
-          <div class="help-tool" onclick="HELP_OVERLAY.navigate('gallery')">
-            <span class="help-emoji">🎨</span>
-            <strong>Galeria</strong>
-            <small>Gerar imagens</small>
-          </div>
-          <div class="help-tool" onclick="HELP_OVERLAY.navigate('memory')">
-            <span class="help-emoji">💭</span>
-            <strong>Memória</strong>
-            <small>IA aprende sobre você</small>
-          </div>
-          <div class="help-tool" onclick="HELP_OVERLAY.navigate('notes')">
-            <span class="help-emoji">📝</span>
-            <strong>Notas</strong>
-            <small>Anotações</small>
-          </div>
-        </div>
-
+        <div class="help-tools-grid">${gridHtml}</div>
         <div class="help-overlay-actions">
-          <button class="help-btn-primary" onclick="HELP_OVERLAY.close()">Entendi! Começar</button>
-          <button class="help-btn-secondary" onclick="HELP_OVERLAY.openDocs()">📖 Ver Guia Completo</button>
+          <button class="help-btn-primary">Entendi! Começar</button>
+          <button class="help-btn-secondary">📖 Ver Guia Completo</button>
         </div>
-
         <p class="help-overlay-footer">
-          💡 Clique em <strong>❓</strong> no canto superior direito para ver dicas a qualquer momento
+          💡 Clique em <strong>?</strong> no canto superior direito para ver dicas a qualquer momento
         </p>
       </div>
     `;
 
     document.body.appendChild(overlay);
-    console.log('[HELP_OVERLAY] Overlay adicionado ao DOM');
 
-    // Adicionar event listeners
-    const bg = overlay.querySelector('.help-overlay-bg');
-    const closeBtn = overlay.querySelector('.help-overlay-close');
-    
-    if (bg) {
-      bg.addEventListener('click', () => this.close());
-    }
-    
-    if (closeBtn) {
-      closeBtn.addEventListener('click', () => this.close());
-    }
+    // Event listeners — sem inline onclick para evitar problemas de escopo
+    overlay.querySelector('.help-overlay-bg').addEventListener('click', () => this.close());
+    overlay.querySelector('.help-overlay-close').addEventListener('click', () => this.close());
+    overlay.querySelector('.help-btn-primary').addEventListener('click', () => this.close());
+    overlay.querySelector('.help-btn-secondary').addEventListener('click', () => this.openDocs());
 
-    // Animar entrada
-    setTimeout(() => {
-      const modal = overlay.querySelector('.help-overlay-modal');
-      if (modal) {
-        modal.classList.add('show');
-        console.log('[HELP_OVERLAY] Animação iniciada');
-      }
-    }, 100);
+    // Cada card de ferramenta
+    overlay.querySelectorAll('.help-tool').forEach(card => {
+      card.addEventListener('click', () => {
+        const tool = card.getAttribute('data-tool');
+        this.navigate(tool);
+      });
+    });
   },
 
   close() {
     const overlay = document.getElementById('help-overlay');
-    if (overlay) {
-      const modal = overlay.querySelector('.help-overlay-modal');
-      modal.classList.remove('show');
-      setTimeout(() => overlay.remove(), 300);
-    }
+    if (overlay) overlay.remove();
   },
 
   openDocs() {
-    // Redireciona para a documentação
-    window.location.hash = '#docs/COMO_USAR.md';
     this.close();
+    window.location.hash = '#docs/COMO_USAR.md';
   },
 
   navigate(tool) {
-    // Fecha o overlay e navega para a ferramenta
     this.close();
-    
-    // Mapeia cada ferramenta para seu botão ou rota
-    const toolMap = {
-      'chat': () => {
-        // Chat é a página principal — limpar hash
-        window.location.hash = '';
-      },
-      'search': () => {
-        // Pesquisa (research)
-        const btn = document.getElementById('tool-research-btn');
-        if (btn) btn.click();
-      },
-      'document': () => {
-        // Documentos
-        const btn = document.getElementById('overflow-doc-btn');
-        if (btn) btn.click();
-      },
-      'email': () => {
-        // Email route
-        window.location.pathname = '/email';
-      },
-      'calendar': () => {
-        // Calendário
-        window.location.pathname = '/calendar';
-      },
-      'cookbook': () => {
-        // Cookbook
-        const btn = document.getElementById('tool-cookbook-btn');
-        if (btn) btn.click();
-      },
-      'compare': () => {
-        // Comparar
-        const btn = document.getElementById('tool-compare-btn');
-        if (btn) btn.click();
-      },
-      'gallery': () => {
-        // Galeria
-        window.location.pathname = '/gallery';
-      },
-      'memory': () => {
-        // Memória
-        const btn = document.getElementById('tool-memory-btn');
-        if (btn) btn.click();
-      },
-      'notes': () => {
-        // Notas
-        window.location.pathname = '/notes';
-      }
-    };
-    
-    const action = toolMap[tool];
-    if (action && typeof action === 'function') {
-      setTimeout(action, 350); // Aguarda animação do overlay
-    }
-  }
 
-}; // fim HELP_OVERLAY
+    const actions = {
+      'chat':     () => { window.location.hash = ''; },
+      'search':   () => { document.getElementById('tool-research-btn')?.click(); },
+      'document': () => { document.getElementById('overflow-doc-btn')?.click(); },
+      'email':    () => { window.location.href = '/email'; },
+      'calendar': () => { document.getElementById('tool-calendar-btn')?.click(); },
+      'cookbook': () => { document.getElementById('tool-cookbook-btn')?.click(); },
+      'compare':  () => { document.getElementById('tool-compare-btn')?.click(); },
+      'gallery':  () => { document.getElementById('tool-gallery-btn')?.click(); },
+      'memory':   () => { document.getElementById('tool-memory-btn')?.click(); },
+      'notes':    () => { document.getElementById('tool-notes-btn')?.click(); },
+    };
+
+    const action = actions[tool];
+    if (action) setTimeout(action, 200);
+  }
+};
 
 // Inicializar quando o DOM estiver pronto
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => HELP_OVERLAY.init());
+  document.addEventListener('DOMContentLoaded', () => window.HELP_OVERLAY.init());
 } else {
-  HELP_OVERLAY.init();
+  window.HELP_OVERLAY.init();
 }
