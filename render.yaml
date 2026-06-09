@@ -33,7 +33,7 @@ services:
       # Substitua pela URL real do seu app após o primeiro deploy.
       # Exemplo: https://odysseus-xyz.onrender.com
       - key: ALLOWED_ORIGINS
-        value: "https://odysseus.onrender.com"
+        value: "https://odysseus-uo9n.onrender.com"
       - key: LOCALHOST_BYPASS
         value: "false"
 
