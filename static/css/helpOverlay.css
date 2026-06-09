@@ -375,6 +375,71 @@
   }
 }
 
+/* ── Focus styles para acessibilidade de teclado ─────────── */
+
+.help-overlay-close:focus-visible,
+.help-btn-primary:focus-visible,
+.help-btn-secondary:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--brand-color, #7c3aed);
+}
+
+.help-tool:focus-visible {
+  outline: 2px solid var(--brand-color, #7c3aed);
+  outline-offset: 2px;
+  background: var(--brand-color, #7c3aed);
+  border-color: var(--brand-color, #7c3aed);
+}
+
+.help-tool:focus-visible strong,
+.help-tool:focus-visible small {
+  color: white;
+}
+
+#help-grid-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px var(--brand-color, #7c3aed);
+}
+
+/* Animação de entrada para o modal */
+@keyframes overlay-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modal-slide-up {
+  from { opacity: 0; transform: scale(0.95) translateY(16px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);    }
+}
+
+#help-overlay {
+  animation: overlay-fade-in 0.2s ease forwards;
+}
+
+.help-overlay-modal {
+  animation: modal-slide-up 0.25s cubic-bezier(0.23, 1, 0.320, 1) forwards;
+}
+
+/* Suporte a reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  #help-overlay,
+  .help-overlay-modal {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .help-tool:hover {
+    transform: none;
+  }
+
+  .help-btn-primary:hover,
+  .help-btn-secondary:hover {
+    transform: none;
+  }
+}
+
 /* Scroll suave */
 .help-overlay-modal::-webkit-scrollbar {
   width: 6px;

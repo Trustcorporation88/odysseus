@@ -1,14 +1,23 @@
 // Overlay de instruções integrado ao Odysseus
-// Mostra um guia rápido quando o usuário abre
+// Mostra um guia rápido na primeira visita do usuário
+
+const _OVERLAY_SEEN_KEY = 'odysseus_help_seen';
 
 window.HELP_OVERLAY = {
   shown: false,
 
+  _hasSeenBefore() {
+    try { return !!localStorage.getItem(_OVERLAY_SEEN_KEY); } catch { return false; }
+  },
+
+  _markSeen() {
+    try { localStorage.setItem(_OVERLAY_SEEN_KEY, '1'); } catch {}
+  },
+
   init() {
-    if (!this.shown) {
+    if (!this._hasSeenBefore()) {
       setTimeout(() => this.show(), 1500);
     }
-    // Adicionar botão grid após a página carregar
     setTimeout(() => this.addGridButton(), 2500);
   },
 
@@ -41,13 +50,17 @@ window.HELP_OVERLAY = {
       </div>
     `).join('');
 
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Bem-vindo ao Odysseus');
+
     overlay.innerHTML = `
       <div class="help-overlay-bg"></div>
-      <div class="help-overlay-modal">
-        <button class="help-overlay-close">✕</button>
+      <div class="help-overlay-modal" tabindex="-1">
+        <button class="help-overlay-close" aria-label="Fechar boas-vindas">✕</button>
         <h2>🚀 Bem-vindo ao Odysseus!</h2>
         <p>Uma plataforma com 10 ferramentas de IA em um único lugar.</p>
-        <div class="help-tools-grid">${gridHtml}</div>
+        <div class="help-tools-grid" role="list">${gridHtml}</div>
         <div class="help-overlay-actions">
           <button class="help-btn-primary">Entendi! Começar</button>
           <button class="help-btn-secondary">📖 Ver Guia Completo</button>
@@ -58,24 +71,65 @@ window.HELP_OVERLAY = {
       </div>
     `;
 
+    // Marcar cards como listitem para screen readers
+    overlay.querySelectorAll('.help-tool').forEach(card => {
+      card.setAttribute('role', 'listitem');
+    });
+
     document.body.appendChild(overlay);
 
-    // Event listeners — sem inline onclick para evitar problemas de escopo
+    // Focar o modal para screen readers
+    const modal = overlay.querySelector('.help-overlay-modal');
+    requestAnimationFrame(() => modal && modal.focus());
+
+    // Event listeners
     overlay.querySelector('.help-overlay-bg').addEventListener('click', () => this.close());
     overlay.querySelector('.help-overlay-close').addEventListener('click', () => this.close());
     overlay.querySelector('.help-btn-primary').addEventListener('click', () => this.close());
     overlay.querySelector('.help-btn-secondary').addEventListener('click', () => this.openDocs());
 
+    // Tecla Escape fecha o overlay
+    this._escHandler = (e) => { if (e.key === 'Escape') this.close(); };
+    document.addEventListener('keydown', this._escHandler);
+
+    // Focus trap dentro do overlay
+    overlay.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+      const focusable = overlay.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
+
     // Cada card de ferramenta
     overlay.querySelectorAll('.help-tool').forEach(card => {
+      card.setAttribute('tabindex', '0');
       card.addEventListener('click', () => {
         const tool = card.getAttribute('data-tool');
         this.navigate(tool);
+      });
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const tool = card.getAttribute('data-tool');
+          this.navigate(tool);
+        }
       });
     });
   },
 
   close() {
+    this._markSeen();
+    if (this._escHandler) {
+      document.removeEventListener('keydown', this._escHandler);
+      this._escHandler = null;
+    }
     const overlay = document.getElementById('help-overlay');
     if (overlay) overlay.remove();
   },
@@ -112,6 +166,7 @@ window.HELP_OVERLAY = {
 
   reopen() {
     this.shown = false;
+    this._markSeen(); // não mostrar automaticamente em próximos loads, mas pode reabrir manualmente
     this.show();
   },
 

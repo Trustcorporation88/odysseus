@@ -231,6 +231,174 @@ const PT = {
   "Connected": "Conectado",
   "Disconnected": "Desconectado",
   "Offline": "Offline",
+
+  // Acessibilidade / UI geral
+  "Skip to main content": "Pular para o conteúdo principal",
+  "Skip to chat": "Pular para o chat",
+  "Close": "Fechar",
+  "Open menu": "Abrir menu",
+  "Close menu": "Fechar menu",
+  "Toggle sidebar": "Alternar barra lateral",
+  "Sidebar": "Barra lateral",
+  "Main content": "Conteúdo principal",
+
+  // Welcome screen
+  "Welcome, type /setup to get started.": "Bem-vindo! Digite /setup para começar.",
+  "New chat": "Novo chat",
+  "Rename session": "Renomear sessão",
+  "Delete session": "Excluir sessão",
+  "Pin session": "Fixar sessão",
+  "Unpin session": "Desafixar sessão",
+
+  // Modos de chat
+  "Chat mode": "Modo Chat",
+  "Agent mode": "Modo Agente",
+  "Nobody mode": "Modo Anônimo",
+  "Incognito": "Anônimo",
+  "Nobody mode active": "Modo anônimo ativo",
+
+  // Ferramentas e ações de chat
+  "Attach file": "Anexar arquivo",
+  "More tools": "Mais ferramentas",
+  "Voice input": "Entrada de voz",
+  "Record": "Gravar",
+  "Stop recording": "Parar gravação",
+  "Switch model": "Trocar modelo",
+  "Select model": "Selecionar modelo",
+  "Search models...": "Buscar modelos...",
+  "Add model endpoints": "Adicionar endpoints de modelo",
+
+  // Ações em mensagens
+  "Copy Chat": "Copiar Chat",
+  "Save to Documents": "Salvar nos Documentos",
+  "Rename": "Renomear",
+  "Export": "Exportar",
+
+  // Biblioteca de documentos
+  "Document Library": "Biblioteca de Documentos",
+  "Upload document": "Enviar documento",
+  "Search documents...": "Buscar documentos...",
+  "No documents": "Sem documentos",
+  "New document": "Novo documento",
+
+  // Skills
+  "Add skill": "Adicionar habilidade",
+  "No skills": "Sem habilidades",
+  "Skill name": "Nome da habilidade",
+  "Skill content": "Conteúdo da habilidade",
+
+  // Tarefas
+  "New task": "Nova tarefa",
+  "Complete": "Concluído",
+  "Incomplete": "Incompleto",
+  "Priority": "Prioridade",
+  "High": "Alta",
+  "Medium": "Média",
+  "Low": "Baixa",
+  "No tasks": "Sem tarefas",
+  "Task completed": "Tarefa concluída",
+  "Task deleted": "Tarefa excluída",
+
+  // Galeria / Geração de imagens
+  "Generate": "Gerar",
+  "Generating...": "Gerando...",
+  "Download image": "Baixar imagem",
+  "Delete image": "Excluir imagem",
+  "No saved images": "Sem imagens salvas",
+  "Inpaint": "Inpainting",
+  "Edit image": "Editar imagem",
+  "Negative prompt": "Prompt negativo",
+  "Steps": "Passos",
+  "Guidance": "Orientação",
+  "Seed": "Semente",
+
+  // Pesquisa profunda
+  "Start research": "Iniciar pesquisa",
+  "Research in progress...": "Pesquisa em andamento...",
+  "Research complete": "Pesquisa concluída",
+  "Sources found": "Fontes encontradas",
+  "Export report": "Exportar relatório",
+  "No research results": "Sem resultados de pesquisa",
+
+  // Configurações — abas
+  "Add Models": "Adicionar Modelos",
+  "AI Defaults": "Padrões de IA",
+  "Search & RAG": "Busca e RAG",
+  "Interface": "Interface",
+  "Accessibility": "Acessibilidade",
+  "Storage": "Armazenamento",
+  "Danger Zone": "Zona de Perigo",
+
+  // Provedores
+  "OpenAI": "OpenAI",
+  "Anthropic": "Anthropic",
+  "Ollama": "Ollama",
+  "LM Studio": "LM Studio",
+  "Custom": "Personalizado",
+  "Base URL": "URL base",
+  "API key": "Chave de API",
+  "Test": "Testar",
+  "Save": "Salvar",
+  "Connected": "Conectado",
+  "Failed": "Falhou",
+
+  // Erros comuns
+  "Connection failed": "Conexão falhou",
+  "Request failed": "Requisição falhou",
+  "Server error": "Erro no servidor",
+  "Not found": "Não encontrado",
+  "Unauthorized": "Não autorizado",
+  "Timeout": "Tempo esgotado",
+  "Something went wrong": "Algo deu errado",
+  "Please try again": "Tente novamente",
+
+  // Notificações
+  "Copied!": "Copiado!",
+  "Saved!": "Salvo!",
+  "Deleted": "Excluído",
+  "Updated": "Atualizado",
+  "Created": "Criado",
+
+  // Calendário — mais termos
+  "Sunday": "Domingo",
+  "Monday": "Segunda",
+  "Tuesday": "Terça",
+  "Wednesday": "Quarta",
+  "Thursday": "Quinta",
+  "Friday": "Sexta",
+  "Saturday": "Sábado",
+  "January": "Janeiro",
+  "February": "Fevereiro",
+  "March": "Março",
+  "April": "Abril",
+  "May": "Maio",
+  "June": "Junho",
+  "July": "Julho",
+  "August": "Agosto",
+  "September": "Setembro",
+  "October": "Outubro",
+  "November": "Novembro",
+  "December": "Dezembro",
+
+  // Cookbook — mais termos
+  "Hardware scan": "Escanear hardware",
+  "Download model": "Baixar modelo",
+  "Serve model": "Servir modelo",
+  "Stop serving": "Parar serviço",
+  "Model running": "Modelo em execução",
+  "RAM required": "RAM necessária",
+  "VRAM required": "VRAM necessária",
+  "Recommended": "Recomendado",
+  "Compatible": "Compatível",
+  "Not compatible": "Incompatível",
+
+  // Comparação de modelos
+  "Compare models": "Comparar modelos",
+  "Add another model": "Adicionar outro modelo",
+  "Send to all": "Enviar para todos",
+  "Blind evaluation": "Avaliação cega",
+  "Vote for best": "Votar no melhor",
+  "Tie": "Empate",
 };
 
 // Default to Portuguese (pt-BR) unless explicitly set to English

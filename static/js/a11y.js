@@ -118,6 +118,73 @@
     el.click();
   });
 
+  // Escape key — close the topmost visible modal/overlay.
+  // Tries the most common patterns: .close-btn inside the modal, then
+  // a cancel button, then direct removal for overlays with no close button.
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    // Don't interfere when the user is typing in an input/textarea.
+    var tag = document.activeElement && document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+    // Find the topmost visible modal (highest z-index wins).
+    var modals = Array.from(document.querySelectorAll(
+      '.modal:not(.hidden), [role="dialog"]:not(.hidden)'
+    ));
+    if (!modals.length) return;
+
+    // Sort by z-index descending so the topmost one closes.
+    modals.sort(function (a, b) {
+      var za = parseInt(window.getComputedStyle(a).zIndex, 10) || 0;
+      var zb = parseInt(window.getComputedStyle(b).zIndex, 10) || 0;
+      return zb - za;
+    });
+
+    var top = modals[0];
+    // Try the modal's own close button first.
+    var closeBtn = top.querySelector('.close-btn, [aria-label*="lose"], [data-dismiss]');
+    if (closeBtn) {
+      closeBtn.click();
+    } else {
+      // Fallback: try a Cancel button.
+      var cancelBtn = top.querySelector('button[id*="cancel"], button[class*="cancel"]');
+      if (cancelBtn) cancelBtn.click();
+    }
+  });
+
+  // ---- Focus management for modals ---------------------------------
+  // When a modal opens, remember the previously focused element so we
+  // can restore focus when the modal closes (prevents focus from jumping
+  // to document.body which disorients keyboard/screen-reader users).
+  var _preFocusEl = null;
+
+  document.addEventListener('focusin', function (e) {
+    var modal = e.target && e.target.closest && e.target.closest('[role="dialog"]');
+    if (modal && !_preFocusEl) {
+      // Modal just received focus — remember who had it before.
+      _preFocusEl = document.activeElement === e.target ? null : document.activeElement;
+    }
+  }, true);
+
+  // Watch for modals being removed from the DOM and restore focus.
+  if ('MutationObserver' in window) {
+    new MutationObserver(function (muts) {
+      for (var i = 0; i < muts.length; i++) {
+        var removed = muts[i].removedNodes;
+        for (var j = 0; j < removed.length; j++) {
+          var n = removed[j];
+          if (n.nodeType !== 1) continue;
+          var wasDialog = n.getAttribute && (n.getAttribute('role') === 'dialog' ||
+            n.classList.contains('modal') || n.querySelector('[role="dialog"]'));
+          if (wasDialog && _preFocusEl && document.contains(_preFocusEl)) {
+            try { _preFocusEl.focus(); } catch (_) {}
+            _preFocusEl = null;
+          }
+        }
+      }
+    }).observe(document.body, { childList: true, subtree: false });
+  }
+
   function init() {
     enhanceAll(document);
     enhanceModals(document);
