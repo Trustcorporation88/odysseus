@@ -1,0 +1,62 @@
+# Odysseus — Fly.io deployment config
+# Deploy: fly launch (primeira vez) ou fly deploy (atualizações)
+# Docs: https://fly.io/docs/
+
+app = "odysseus"          # Fly vai sugerir um nome único; mude se quiser
+primary_region = "gru"   # São Paulo — mais perto do Brasil
+                          # Outras opções: mia (Miami), iad (Virginia), ewr (Newark)
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT            = "7000"
+  AUTH_ENABLED    = "true"
+  SECURE_COOKIES  = "true"
+  LOCALHOST_BYPASS = "false"
+
+# Recursos da VM — Fly free tier dá 256MB RAM
+# Para o Odysseus funcionar bem, recomendado 512MB+
+[vm]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[http_service]
+  internal_port       = 7000
+  force_https         = true
+  auto_stop_machines  = true    # para economizar créditos quando inativo
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [http_service.concurrency]
+    type       = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+# Health check no endpoint de versão
+[[http_service.checks]]
+  interval = "30s"
+  timeout  = "10s"
+  grace_period = "60s"
+  method   = "GET"
+  path     = "/api/version"
+
+# Volume persistente para dados (sessions, memória, uploads, SQLite)
+# Criado automaticamente com: fly volumes create odysseus_data --size 1
+[[mounts]]
+  source      = "odysseus_data"
+  destination = "/app/data"
+
+# Secrets necessários (configure com fly secrets set):
+#
+#   fly secrets set ODYSSEUS_ADMIN_PASSWORD=sua_senha_aqui
+#   fly secrets set OPENAI_API_KEY=sk-...
+#   fly secrets set OPENAI_BASE_URL=https://api.freemodel.dev/v1
+#   fly secrets set DEEPSEEK_API_KEY=sk-...
+#   fly secrets set ANTHROPIC_API_KEY=sk-...
+#   fly secrets set ALLOWED_ORIGINS=https://odysseus.fly.dev
+#
+# Opcional (somente se usar):
+#   fly secrets set GEMINI_API_KEY=...
+#   fly secrets set GROQ_API_KEY=...
