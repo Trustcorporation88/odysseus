@@ -2,20 +2,85 @@ services:
   - type: web
     name: odysseus
     runtime: python
-    buildCommand: rm -f data/auth.json && pip install -r requirements.txt && python setup.py
-    startCommand: rm -f data/auth.json && python setup.py && python -m uvicorn app:app --host 0.0.0.0 --port $PORT
+    plan: starter          # mude para "standard" se precisar de mais CPU/RAM
+    region: ohio           # ohio = us-east-2; troque por frankfurt ou singapore se preferir
+    autoDeploy: true
+
+    buildCommand: pip install -r requirements.txt && python setup.py
+
+    startCommand: python -m uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1
+
+    healthCheckPath: /api/version
+
+    # Disco persistente — garante que sessions, memórias, uploads e o banco
+    # SQLite sobrevivam a deploys e reinicializações. Necessário no plano
+    # "starter" ou superior. Remova este bloco apenas se usar banco externo.
+    disk:
+      name: odysseus-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1             # aumente para 5-10 se tiver muitos uploads
+
     envVars:
+      # ── Runtime ───────────────────────────────────────────────────────────
       - key: PYTHON_VERSION
         value: "3.11"
+
+      # ── Segurança ─────────────────────────────────────────────────────────
       - key: AUTH_ENABLED
         value: "true"
+      - key: SECURE_COOKIES
+        value: "true"
+      # Substitua pela URL real do seu app após o primeiro deploy.
+      # Exemplo: https://odysseus-xyz.onrender.com
+      - key: ALLOWED_ORIGINS
+        value: "https://odysseus.onrender.com"
+      - key: LOCALHOST_BYPASS
+        value: "false"
+
+      # ── Credenciais de admin ───────────────────────────────────────────────
       - key: ODYSSEUS_ADMIN_USER
         value: admin
       - key: ODYSSEUS_ADMIN_PASSWORD
-        fromVariable: ODYSSEUS_ADMIN_PASSWORD
-      - key: LLM_HOST
-        fromVariable: LLM_HOST
+        fromVariable: ODYSSEUS_ADMIN_PASSWORD   # defina no dashboard do Render
+
+      # ── Provedores de IA (opcional — adicione os que usar) ─────────────────
       - key: OPENAI_API_KEY
         fromVariable: OPENAI_API_KEY
       - key: OPENAI_BASE_URL
         fromVariable: OPENAI_BASE_URL
+      - key: ANTHROPIC_API_KEY
+        fromVariable: ANTHROPIC_API_KEY
+      - key: GEMINI_API_KEY
+        fromVariable: GEMINI_API_KEY
+      - key: GROQ_API_KEY
+        fromVariable: GROQ_API_KEY
+      - key: XAI_API_KEY
+        fromVariable: XAI_API_KEY
+      - key: OPENROUTER_API_KEY
+        fromVariable: OPENROUTER_API_KEY
+      - key: DEEPSEEK_API_KEY
+        fromVariable: DEEPSEEK_API_KEY
+      - key: MISTRAL_API_KEY
+        fromVariable: MISTRAL_API_KEY
+
+      # ── LLM host (para Ollama/LM Studio self-hosted) ──────────────────────
+      - key: LLM_HOST
+        fromVariable: LLM_HOST
+
+      # ── Busca web ─────────────────────────────────────────────────────────
+      # Deixe vazio no Render (sem SearXNG local).
+      # Aponte para uma instância externa se tiver.
+      # - key: SEARXNG_INSTANCE
+      #   value: https://searxng.example.com
+
+      # ── ChromaDB (vetor store) ────────────────────────────────────────────
+      # Deixe vazio para usar fallback em memória (sem ChromaDB externo).
+      # - key: CHROMADB_HOST
+      #   fromVariable: CHROMADB_HOST
+      # - key: CHROMADB_PORT
+      #   fromVariable: CHROMADB_PORT
+
+      # ── Banco de dados externo (opcional — padrão: SQLite no disco) ────────
+      # Descomente e configure se quiser usar PostgreSQL externo.
+      # - key: DATABASE_URL
+      #   fromVariable: DATABASE_URL
