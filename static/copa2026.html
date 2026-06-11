@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+  <meta name="theme-color" content="#060e1c" />
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
+  <title>Copa 2026 — Fase de Grupos | Odysseus</title>
+  <style>
+    @font-face { font-family: 'Inter'; font-weight: 400; font-style: normal; font-display: swap; src: url('/static/fonts/Inter-Regular.woff2') format('woff2'); }
+    @font-face { font-family: 'Inter'; font-weight: 600; font-style: normal; font-display: swap; src: url('/static/fonts/Inter-SemiBold.woff2') format('woff2'); }
+    @font-face { font-family: 'Fira Code'; font-weight: 400; font-style: normal; font-display: swap; src: url('/static/fonts/FiraCode-Regular.woff2') format('woff2'); }
+    @font-face { font-family: 'Fira Code'; font-weight: 600; font-style: normal; font-display: swap; src: url('/static/fonts/FiraCode-SemiBold.woff2') format('woff2'); }
+    :root { --bg:#060e1c; --bg-soft:#0b1730; --panel:rgba(10,19,39,.92); --panel-strong:rgba(14,26,52,.96); --border:rgba(255,215,0,.18); --text:#f7f3d0; --muted:#b7bfd1; --gold:#FFD700; --live:#2ecc71; --finished:#7f8c8d; --pending:#f39c12; --danger:#e74c3c; --shadow:0 18px 40px rgba(0,0,0,.34); }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; min-height:100vh; color:var(--text); font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif; background:radial-gradient(circle at top, rgba(255,215,0,.16), transparent 30%),linear-gradient(180deg,#0d1730 0%,var(--bg) 38%,#030711 100%); }
+    .page-shell { width:min(1400px,calc(100vw - 32px)); margin:0 auto; padding:32px 0 56px; }
+    .hero,.toolbar,.legend,.status-strip,.empty-state,.match-card { background:var(--panel); border:1px solid var(--border); box-shadow:var(--shadow); backdrop-filter:blur(16px); }
+    .hero { border-radius:28px; padding:28px; display:grid; gap:24px; grid-template-columns:minmax(0,1.6fr) minmax(320px,1fr); margin-bottom:20px; overflow:hidden; position:relative; }
+    .hero::after { content:''; position:absolute; inset:auto -90px -90px auto; width:220px; height:220px; border-radius:50%; background:radial-gradient(circle, rgba(255,215,0,.16), rgba(255,215,0,0)); pointer-events:none; }
+    .eyebrow { display:inline-flex; align-items:center; gap:10px; padding:8px 14px; border-radius:999px; background:rgba(255,215,0,.09); color:var(--gold); font-size:.9rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
+    h1 { margin:16px 0 12px; font-size:clamp(2rem,4vw,3.65rem); line-height:1.03; }
+    .hero p { margin:0; max-width:70ch; color:var(--muted); line-height:1.7; }
+    .hero-actions { margin-top:18px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+    .pill,.refresh-button,.filter-chip { border-radius:999px; border:1px solid transparent; transition:transform .18s ease,border-color .18s ease,background .18s ease,color .18s ease; }
+    .pill { display:inline-flex; align-items:center; gap:10px; background:rgba(255,255,255,.04); color:var(--text); padding:11px 16px; font-size:.95rem; }
+    .pill strong,.stat-card strong,.score-box,.hero small,.meta-value,.search-input,.refresh-button,.filter-chip,.counter { font-family:'Fira Code',monospace; }
+    .hero small { color:rgba(255,255,255,.68); display:block; margin-top:10px; font-size:.86rem; }
+    .hero-stats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; align-content:start; }
+    .stat-card { padding:18px; border-radius:20px; background:var(--panel-strong); border:1px solid rgba(255,215,0,.14); }
+    .stat-card span { display:block; color:var(--muted); font-size:.88rem; margin-bottom:8px; }
+    .stat-card strong { display:block; font-size:1.55rem; color:var(--gold); }
+    .toolbar { border-radius:24px; padding:22px; margin-bottom:16px; display:grid; gap:16px; }
+    .toolbar-top,.toolbar-controls,.status-strip,.legend,.card-top,.team-row,.match-meta,.card-footer { display:flex; justify-content:space-between; gap:12px; align-items:center; }
+    .toolbar-top,.toolbar-controls,.status-strip,.legend,.card-footer,.match-meta { flex-wrap:wrap; }
+    .toolbar-title { display:flex; flex-direction:column; gap:6px; }
+    .toolbar-title h2 { margin:0; font-size:1.25rem; }
+    .toolbar-title p,.legend p,.status-copy,.empty-state p { margin:0; color:var(--muted); line-height:1.55; }
+    .filter-row,.legend-list,.hero-actions,.search-wrap { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+    .filter-chip { border:1px solid rgba(255,215,0,.12); background:rgba(255,255,255,.03); color:var(--text); padding:10px 14px; cursor:pointer; font-size:.92rem; }
+    .filter-chip:hover,.refresh-button:hover { transform:translateY(-1px); border-color:rgba(255,215,0,.4); }
+    .filter-chip.active { background:linear-gradient(135deg, rgba(255,215,0,.18), rgba(255,215,0,.08)); border-color:rgba(255,215,0,.62); color:var(--gold); }
+    .search-wrap { justify-content:flex-end; }
+    .search-input { width:min(320px,100%); border-radius:999px; border:1px solid rgba(255,215,0,.16); background:rgba(255,255,255,.04); color:var(--text); padding:12px 16px; font-size:.95rem; outline:none; }
+    .search-input::placeholder { color:rgba(247,243,208,.45); }
+    .search-input:focus { border-color:rgba(255,215,0,.6); box-shadow:0 0 0 4px rgba(255,215,0,.09); }
+    .refresh-button { padding:12px 16px; cursor:pointer; border:1px solid rgba(255,215,0,.2); background:linear-gradient(135deg, rgba(255,215,0,.18), rgba(255,215,0,.1)); color:var(--gold); font-weight:600; }
+    .status-strip { border-radius:18px; padding:16px 18px; margin-bottom:18px; }
+    .status-pill { display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px; border:1px solid rgba(255,215,0,.14); background:rgba(255,255,255,.03); color:var(--text); font-weight:600; }
+    .status-pill::before,.status-dot { content:''; width:10px; height:10px; border-radius:50%; display:inline-block; background:var(--pending); box-shadow:0 0 0 6px rgba(243,156,18,.12); }
+    .status-pill.online::before { background:var(--live); box-shadow:0 0 0 6px rgba(46,204,113,.12); }
+    .status-pill.fallback::before { background:var(--danger); box-shadow:0 0 0 6px rgba(231,76,60,.12); }
+    .status-pill.loading::before,.legend-item .status-dot.live { animation:pulse 1.4s infinite; }
+    .legend { border-radius:20px; padding:18px 20px; margin-bottom:18px; }
+    .legend-item { display:inline-flex; align-items:center; gap:10px; color:var(--muted); font-size:.94rem; }
+    .legend-item .status-dot.finished { background:#1a6632; box-shadow:0 0 0 6px rgba(26,102,50,.14); }
+    .legend-item .status-dot.pending { background:#94a3b8; box-shadow:0 0 0 6px rgba(148,163,184,.14); }
+    .legend-item .status-dot.live { background:#cc0000; box-shadow:0 0 0 6px rgba(204,0,0,.14); }
+    .schedule-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:16px; }
+    .match-card { border-radius:22px; padding:20px; display:grid; gap:16px; position:relative; overflow:hidden; isolation:isolate; }
+    .match-card::after { content:''; position:absolute; inset:auto -40px -40px auto; width:120px; height:120px; border-radius:50%; background:radial-gradient(circle, rgba(255,215,0,.08), transparent 62%); z-index:-1; }
+    .group-badge,.status-badge { border-radius:999px; padding:7px 12px; font-size:.78rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+    .group-badge { color:#fff; box-shadow:inset 0 0 0 1px rgba(255,255,255,.15); }
+    .status-badge.live { background:rgba(204,0,0,.16); color:#ffd6d6; border:1px solid rgba(204,0,0,.46); animation:pulse-live 1.4s ease-in-out infinite; }
+    .status-badge.finished { background:rgba(26,102,50,.18); color:#d9f2e2; border:1px solid rgba(26,102,50,.4); }
+    .status-badge.pending { background:rgba(148,163,184,.14); color:#e2e8f0; border:1px solid rgba(148,163,184,.34); }
+    .date-block { display:flex; flex-direction:column; gap:4px; }
+    .date-block strong { font-size:1rem; color:var(--gold); }
+    .date-block span,.meta-label,.result-caption,.empty-state strong { color:var(--muted); font-size:.88rem; }
+    .teams { display:grid; gap:12px; }
+    .team-name { flex:1; display:flex; align-items:center; gap:12px; min-width:0; font-weight:600; font-size:1rem; }
+    .flag { width:36px; height:36px; display:inline-grid; place-items:center; border-radius:50%; background:rgba(255,255,255,.06); font-size:1.2rem; flex-shrink:0; }
+    .team-name span:last-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .score-box { min-width:56px; padding:10px 12px; border-radius:14px; background:rgba(255,255,255,.04); border:1px solid rgba(255,215,0,.12); text-align:center; font-size:1.2rem; font-weight:700; color:var(--gold); }
+    .score-box.pending { background:rgba(148,163,184,.08); border-color:rgba(148,163,184,.24); color:#e2e8f0; }
+    .score-box.live { background:rgba(204,0,0,.12); border-color:rgba(204,0,0,.34); color:#ffd6d6; animation:pulse-live 1.4s ease-in-out infinite; }
+    .score-box.finished { background:rgba(26,102,50,.12); border-color:rgba(26,102,50,.32); color:#d9f2e2; }
+    @keyframes pulse-live { 0%, 100% { box-shadow:0 0 0 0 rgba(204,0,0,.18); } 50% { box-shadow:0 0 0 8px rgba(204,0,0,.02); } }
+    .match-meta { padding-top:14px; border-top:1px solid rgba(255,255,255,.08); color:var(--muted); font-size:.9rem; }
+    .meta-block { display:flex; flex-direction:column; gap:3px; min-width:0; }
+    .meta-value { color:var(--text); font-size:.92rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+    .counter { color:var(--gold); font-size:.92rem; }
+    .empty-state { margin-top:10px; border-radius:24px; padding:40px 24px; text-align:center; }
+    .empty-state strong { display:block; color:var(--gold); margin-bottom:10px; font-size:1rem; }
+    @keyframes pulse { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.2); opacity:.75; } }
+    @media (max-width:1024px) { .hero { grid-template-columns:1fr; } }
+    @media (max-width:720px) { .page-shell { width:min(100vw - 18px, 1400px); padding:18px 0 36px; } .hero,.toolbar,.legend,.status-strip,.match-card,.empty-state { border-radius:20px; } .hero { padding:22px; } .toolbar,.legend,.status-strip { padding:18px; } .hero-stats { grid-template-columns:1fr 1fr; } .search-wrap { width:100%; justify-content:stretch; } .search-input,.refresh-button { width:100%; } }
+    @media (max-width:560px) { h1 { font-size:2rem; } .hero-stats { grid-template-columns:1fr; } .toolbar-top,.status-strip,.legend,.team-row,.card-top,.match-meta,.card-footer { align-items:flex-start; } .status-strip,.legend { flex-direction:column; } .team-name span:last-child { white-space:normal; } .score-box { min-width:50px; } }
+  </style>
+</head>
+<body>
+  <main class="page-shell">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">Odysseus • Copa 2026</span>
+        <h1>Fase de grupos com placares automáticos a cada 60 segundos.</h1>
+        <p>Página dedicada aos 48 jogos da Copa 2026 com filtros por grupo, busca por seleção e integração direta com <strong>/api/copa2026/scores</strong>. Se a API ficar indisponível, o último estado salvo no navegador continua visível via localStorage.</p>
+        <div class="hero-actions">
+          <span class="pill">⚽ <strong id="hero-total">48 jogos</strong></span>
+          <span class="pill">🔄 <strong>refresh 60s</strong></span>
+          <span class="pill">💾 <strong>fallback local</strong></span>
+        </div>
+        <small id="last-sync">Última sincronização: aguardando API</small>
+      </div>
+      <div class="hero-stats">
+        <article class="stat-card"><span>Jogos visíveis</span><strong id="visible-count">48</strong></article>
+        <article class="stat-card"><span>Ao vivo</span><strong id="live-count">0</strong></article>
+        <article class="stat-card"><span>Encerrados</span><strong id="finished-count">0</strong></article>
+        <article class="stat-card"><span>Pendentes</span><strong id="pending-count">48</strong></article>
+      </div>
+    </section>
+    <section class="toolbar">
+      <div class="toolbar-top">
+        <div class="toolbar-title">
+          <h2>Calendário da fase de grupos</h2>
+          <p>Filtros dinâmicos para Todos, grupos A-L e busca instantânea por nome da seleção.</p>
+        </div>
+        <span class="counter" id="filtered-label">Exibindo 48 de 48 jogos</span>
+      </div>
+      <div class="toolbar-controls">
+        <div class="filter-row" id="group-filters" aria-label="Filtros por grupo"></div>
+        <div class="search-wrap">
+          <input id="team-search" class="search-input" type="search" placeholder="Buscar por time..." aria-label="Buscar seleção" />
+          <button id="manual-refresh" class="refresh-button" type="button">Atualizar agora</button>
+        </div>
+      </div>
+    </section>
+    <section class="status-strip" aria-live="polite">
+      <div><span id="api-status-pill" class="status-pill loading">Aguardando API</span></div>
+      <p id="api-status-copy" class="status-copy">A página tenta buscar placares em tempo real e cai para localStorage sem quebrar a interface.</p>
+    </section>
+    <section class="legend">
+      <div class="legend-list">
+        <span class="legend-item"><span class="status-dot live"></span>Ao vivo</span>
+        <span class="legend-item"><span class="status-dot finished"></span>Encerrado</span>
+        <span class="legend-item"><span class="status-dot pending"></span>Aguardando jogo</span>
+      </div>
+      <p>Compatível com o visual do Odysseus em dourado (#FFD700) sobre fundo escuro (#060e1c).</p>
+    </section>
+    <section id="schedule" class="schedule-grid" aria-live="polite"></section>
+    <section id="empty-state" class="empty-state" hidden>
+      <strong>Nenhum jogo encontrado.</strong>
+      <p>Ajuste o grupo selecionado ou refine a busca por seleção.</p>
+    </section>
+  </main>
+  <script nonce="{{CSP_NONCE}}">
+    const GROUP_COLORS = {
+      "A": "#c0392b",
+      "B": "#e67e22",
+      "C": "#c9a800",
+      "D": "#27ae60",
+      "E": "#16a085",
+      "F": "#2471a3",
+      "G": "#8e44ad",
+      "H": "#cb4335",
+      "I": "#e74c3c",
+      "J": "#546e7a",
+      "K": "#0097a7",
+      "L": "#7cb342"
+};
+    const MATCHES = [
+      {
+            "id": "A1",
+            "group": "A",
+            "badgeColor": "#c0392b",
+            "date": "11/06 QUI",
+            "kickoff": "13:00",
+            "venue": "Cidade do México",
+            "home": {
+                  "name": "México",
+                  "flag": "🇲🇽"
+            },
+            "away": {
+                  "name": "África do Sul",
+                  "flag": "🇿🇦"
+            }
+      },
+      {
+            "id": "A2",
+            "group": "A",
+            "badgeColor": "#c0392b",
+            "date": "12/06 SEX",
+            "kickoff": "16:00",
+            "venue": "Guadalajara",
+            "home": {
+                  "name": "Coreia do Sul",
+                  "flag": "🇰🇷"
+            },
+            "away": {
+                  "name": "Tchéquia",
+                  "flag": "🇨🇿"
+            }
+      },
+      {
+            "id": "A3",
+            "group": "A",
+            "badgeColor": "#c0392b",
+            "date": "15/06 SEG",
+            "kickoff": "19:00",
+            "venue": "Monterrey",
+            "home": {
+                  "name": "México",
+                  "flag": "🇲🇽"
+            },
+            "away": {
+                  "name": "Coreia do Sul",
+                  "flag": "🇰🇷"
+            }
+      },
+      {
+            "id": "A4",
+            "group": "A",
+            "badgeColor": "#c0392b",
+            "date": "16/06 TER",
+            "kickoff": "22:00",
+            "venue": "Toronto",
+            "home": {
+                  "name": "África do Sul",
+                  "flag": "🇿🇦"
+            },
+            "away": {
+                  "name": "Tchéquia",
+                  "flag": "🇨🇿"
+            }
+      },
+      {
+            "id": "B1",
+            "group": "B",
+            "badgeColor": "#e67e22",
+            "date": "11/06 QUI",
+            "kickoff": "14:00",
+            "venue": "Los Angeles",
+            "home": {
+                  "name": "Estados Unidos",
+                  "flag": "🇺🇸"
+            },
+            "away": {
+                  "name": "Marrocos",
+                  "flag": "🇲🇦"
+            }
+      },
+      {
+            "id": "B2",
+            "group": "B",
+            "badgeColor": "#e67e22",
+            "date": "12/06 SEX",
+            "kickoff": "17:00",
+            "venue": "Vancouver",
+            "home": {
+                  "name": "Colômbia",
+                  "flag": "🇨🇴"
+            },
+            "away": {
+                  "name": "Noruega",
+                  "flag": "🇳🇴"
+            }
+      },
+      {
+            "id": "B3",
+            "group": "B",
+            "badgeColor": "#e67e22",
+            "date": "15/06 SEG",
+            "kickoff": "20:00",
+            "venue": "Seattle",
+            "home": {
+                  "name": "Estados Unidos",
+                  "flag": "🇺🇸"
+            },
+            "away": {
+                  "name": "Colômbia",
+                  "flag": "🇨🇴"
+            }
+      },
+      {
+            "id": "B4",
+            "group": "B",
+            "badgeColor": "#e67e22",
+            "date": "16/06 TER",
+            "kickoff": "22:00",
+            "venue": "Houston",
+            "home": {
+                  "name": "Marrocos",
+                  "flag": "🇲🇦"
+            },
+            "away": {
+                  "name": "Noruega",
+                  "flag": "🇳🇴"
+            }
+      },
+      {
+            "id": "C1",
+            "group": "C",
+            "badgeColor": "#c9a800",
+            "date": "13/06 SÁB",
+            "kickoff": "13:00",
+            "venue": "Miami",
+            "home": {
+                  "name": "Brasil",
+                  "flag": "🇧🇷"
+            },
+            "away": {
+                  "name": "Japão",
+                  "flag": "🇯🇵"
+            }
+      },
+      {
+            "id": "C2",
+            "group": "C",
+            "badgeColor": "#c9a800",
+            "date": "14/06 DOM",
+            "kickoff": "16:00",
+            "venue": "Dallas",
+            "home": {
+                  "name": "Suíça",
+                  "flag": "🇨🇭"
+            },
+            "away": {
+                  "name": "Nigéria",
+                  "flag": "🇳🇬"
+            }
+      },
+      {
+            "id": "C3",
+            "group": "C",
+            "badgeColor": "#c9a800",
+            "date": "17/06 QUA",
+            "kickoff": "19:00",
+            "venue": "Atlanta",
+            "home": {
+                  "name": "Brasil",
+                  "flag": "🇧🇷"
+            },
+            "away": {
+                  "name": "Suíça",
+                  "flag": "🇨🇭"
+            }
+      },
+      {
+            "id": "C4",
+            "group": "C",
+            "badgeColor": "#c9a800",
+            "date": "18/06 QUI",
+            "kickoff": "21:00",
+            "venue": "Kansas City",
+            "home": {
+                  "name": "Japão",
+                  "flag": "🇯🇵"
+            },
+            "away": {
+                  "name": "Nigéria",
+                  "flag": "🇳🇬"
+            }
+      },
+      {
+            "id": "D1",
+            "group": "D",
+            "badgeColor": "#27ae60",
+            "date": "13/06 SÁB",
+            "kickoff": "14:00",
+            "venue": "Boston",
+            "home": {
+                  "name": "Argentina",
+                  "flag": "🇦🇷"
+            },
+            "away": {
+                  "name": "Canadá",
+                  "flag": "🇨🇦"
+            }
+      },
+      {
+            "id": "D2",
+            "group": "D",
+            "badgeColor": "#27ae60",
+            "date": "14/06 DOM",
+            "kickoff": "17:00",
+            "venue": "Filadélfia",
+            "home": {
+                  "name": "Egito",
+                  "flag": "🇪🇬"
+            },
+            "away": {
+                  "name": "Croácia",
+                  "flag": "🇭🇷"
+            }
+      },
+      {
+            "id": "D3",
+            "group": "D",
+            "badgeColor": "#27ae60",
+            "date": "17/06 QUA",
+            "kickoff": "20:00",
+            "venue": "Monterrey",
+            "home": {
+                  "name": "Argentina",
+                  "flag": "🇦🇷"
+            },
+            "away": {
+                  "name": "Egito",
+                  "flag": "🇪🇬"
+            }
+      },
+      {
+            "id": "D4",
+            "group": "D",
+            "badgeColor": "#27ae60",
+            "date": "18/06 QUI",
+            "kickoff": "22:00",
+            "venue": "Guadalajara",
+            "home": {
+                  "name": "Canadá",
+                  "flag": "🇨🇦"
+            },
+            "away": {
+                  "name": "Croácia",
+                  "flag": "🇭🇷"
+            }
+      },
+      {
+            "id": "E1",
+            "group": "E",
+            "badgeColor": "#16a085",
+            "date": "15/06 SEG",
+            "kickoff": "13:00",
+            "venue": "Toronto",
+            "home": {
+                  "name": "Espanha",
+                  "flag": "🇪🇸"
+            },
+            "away": {
+                  "name": "Chile",
+                  "flag": "🇨🇱"
+            }
+      },
+      {
+            "id": "E2",
+            "group": "E",
+            "badgeColor": "#16a085",
+            "date": "16/06 TER",
+            "kickoff": "16:00",
+            "venue": "Vancouver",
+            "home": {
+                  "name": "Senegal",
+                  "flag": "🇸🇳"
+            },
+            "away": {
+                  "name": "Austrália",
+                  "flag": "🇦🇺"
+            }
+      },
+      {
+            "id": "E3",
+            "group": "E",
+            "badgeColor": "#16a085",
+            "date": "19/06 SEX",
+            "kickoff": "19:00",
+            "venue": "Houston",
+            "home": {
+                  "name": "Espanha",
+                  "flag": "🇪🇸"
+            },
+            "away": {
+                  "name": "Senegal",
+                  "flag": "🇸🇳"
+            }
+      },
+      {
+            "id": "E4",
+            "group": "E",
+            "badgeColor": "#16a085",
+            "date": "20/06 SÁB",
+            "kickoff": "22:00",
+            "venue": "Dallas",
+            "home": {
+                  "name": "Chile",
+                  "flag": "🇨🇱"
+            },
+            "away": {
+                  "name": "Austrália",
+                  "flag": "🇦🇺"
+            }
+      },
+      {
+            "id": "F1",
+            "group": "F",
+            "badgeColor": "#2471a3",
+            "date": "15/06 SEG",
+            "kickoff": "14:00",
+            "venue": "Nova York/Nova Jersey",
+            "home": {
+                  "name": "França",
+                  "flag": "🇫🇷"
+            },
+            "away": {
+                  "name": "Dinamarca",
+                  "flag": "🇩🇰"
+            }
+      },
+      {
+            "id": "F2",
+            "group": "F",
+            "badgeColor": "#2471a3",
+            "date": "16/06 TER",
+            "kickoff": "17:00",
+            "venue": "Miami",
+            "home": {
+                  "name": "Gana",
+                  "flag": "🇬🇭"
+            },
+            "away": {
+                  "name": "Peru",
+                  "flag": "🇵🇪"
+            }
+      },
+      {
+            "id": "F3",
+            "group": "F",
+            "badgeColor": "#2471a3",
+            "date": "19/06 SEX",
+            "kickoff": "20:00",
+            "venue": "Atlanta",
+            "home": {
+                  "name": "França",
+                  "flag": "🇫🇷"
+            },
+            "away": {
+                  "name": "Gana",
+                  "flag": "🇬🇭"
+            }
+      },
+      {
+            "id": "F4",
+            "group": "F",
+            "badgeColor": "#2471a3",
+            "date": "20/06 SÁB",
+            "kickoff": "22:00",
+            "venue": "Seattle",
+            "home": {
+                  "name": "Dinamarca",
+                  "flag": "🇩🇰"
+            },
+            "away": {
+                  "name": "Peru",
+                  "flag": "🇵🇪"
+            }
+      },
+      {
+            "id": "G1",
+            "group": "G",
+            "badgeColor": "#8e44ad",
+            "date": "17/06 QUA",
+            "kickoff": "13:00",
+            "venue": "Kansas City",
+            "home": {
+                  "name": "Inglaterra",
+                  "flag": "🏴"
+            },
+            "away": {
+                  "name": "Sérvia",
+                  "flag": "🇷🇸"
+            }
+      },
+      {
+            "id": "G2",
+            "group": "G",
+            "badgeColor": "#8e44ad",
+            "date": "18/06 QUI",
+            "kickoff": "16:00",
+            "venue": "Boston",
+            "home": {
+                  "name": "Tunísia",
+                  "flag": "🇹🇳"
+            },
+            "away": {
+                  "name": "Equador",
+                  "flag": "🇪🇨"
+            }
+      },
+      {
+            "id": "G3",
+            "group": "G",
+            "badgeColor": "#8e44ad",
+            "date": "21/06 DOM",
+            "kickoff": "19:00",
+            "venue": "Los Angeles",
+            "home": {
+                  "name": "Inglaterra",
+                  "flag": "🏴"
+            },
+            "away": {
+                  "name": "Tunísia",
+                  "flag": "🇹🇳"
+            }
+      },
+      {
+            "id": "G4",
+            "group": "G",
+            "badgeColor": "#8e44ad",
+            "date": "22/06 SEG",
+            "kickoff": "21:00",
+            "venue": "Filadélfia",
+            "home": {
+                  "name": "Sérvia",
+                  "flag": "🇷🇸"
+            },
+            "away": {
+                  "name": "Equador",
+                  "flag": "🇪🇨"
+            }
+      },
+      {
+            "id": "H1",
+            "group": "H",
+            "badgeColor": "#cb4335",
+            "date": "17/06 QUA",
+            "kickoff": "14:00",
+            "venue": "Monterrey",
+            "home": {
+                  "name": "Alemanha",
+                  "flag": "🇩🇪"
+            },
+            "away": {
+                  "name": "Camarões",
+                  "flag": "🇨🇲"
+            }
+      },
+      {
+            "id": "H2",
+            "group": "H",
+            "badgeColor": "#cb4335",
+            "date": "18/06 QUI",
+            "kickoff": "17:00",
+            "venue": "Guadalajara",
+            "home": {
+                  "name": "Uruguai",
+                  "flag": "🇺🇾"
+            },
+            "away": {
+                  "name": "Irã",
+                  "flag": "🇮🇷"
+            }
+      },
+      {
+            "id": "H3",
+            "group": "H",
+            "badgeColor": "#cb4335",
+            "date": "21/06 DOM",
+            "kickoff": "20:00",
+            "venue": "Toronto",
+            "home": {
+                  "name": "Alemanha",
+                  "flag": "🇩🇪"
+            },
+            "away": {
+                  "name": "Uruguai",
+                  "flag": "🇺🇾"
+            }
+      },
+      {
+            "id": "H4",
+            "group": "H",
+            "badgeColor": "#cb4335",
+            "date": "22/06 SEG",
+            "kickoff": "22:00",
+            "venue": "Vancouver",
+            "home": {
+                  "name": "Camarões",
+                  "flag": "🇨🇲"
+            },
+            "away": {
+                  "name": "Irã",
+                  "flag": "🇮🇷"
+            }
+      },
+      {
+            "id": "I1",
+            "group": "I",
+            "badgeColor": "#e74c3c",
+            "date": "19/06 SEX",
+            "kickoff": "13:00",
+            "venue": "Dallas",
+            "home": {
+                  "name": "Portugal",
+                  "flag": "🇵🇹"
+            },
+            "away": {
+                  "name": "Argélia",
+                  "flag": "🇩🇿"
+            }
+      },
+      {
+            "id": "I2",
+            "group": "I",
+            "badgeColor": "#e74c3c",
+            "date": "20/06 SÁB",
+            "kickoff": "16:00",
+            "venue": "Miami",
+            "home": {
+                  "name": "Polônia",
+                  "flag": "🇵🇱"
+            },
+            "away": {
+                  "name": "Costa Rica",
+                  "flag": "🇨🇷"
+            }
+      },
+      {
+            "id": "I3",
+            "group": "I",
+            "badgeColor": "#e74c3c",
+            "date": "22/06 SEG",
+            "kickoff": "19:00",
+            "venue": "Nova York/Nova Jersey",
+            "home": {
+                  "name": "Portugal",
+                  "flag": "🇵🇹"
+            },
+            "away": {
+                  "name": "Polônia",
+                  "flag": "🇵🇱"
+            }
+      },
+      {
+            "id": "I4",
+            "group": "I",
+            "badgeColor": "#e74c3c",
+            "date": "23/06 TER",
+            "kickoff": "22:00",
+            "venue": "Seattle",
+            "home": {
+                  "name": "Argélia",
+                  "flag": "🇩🇿"
+            },
+            "away": {
+                  "name": "Costa Rica",
+                  "flag": "🇨🇷"
+            }
+      },
+      {
+            "id": "J1",
+            "group": "J",
+            "badgeColor": "#546e7a",
+            "date": "19/06 SEX",
+            "kickoff": "14:00",
+            "venue": "Houston",
+            "home": {
+                  "name": "Países Baixos",
+                  "flag": "🇳🇱"
+            },
+            "away": {
+                  "name": "Arábia Saudita",
+                  "flag": "🇸🇦"
+            }
+      },
+      {
+            "id": "J2",
+            "group": "J",
+            "badgeColor": "#546e7a",
+            "date": "20/06 SÁB",
+            "kickoff": "17:00",
+            "venue": "Atlanta",
+            "home": {
+                  "name": "Áustria",
+                  "flag": "🇦🇹"
+            },
+            "away": {
+                  "name": "Honduras",
+                  "flag": "🇭🇳"
+            }
+      },
+      {
+            "id": "J3",
+            "group": "J",
+            "badgeColor": "#546e7a",
+            "date": "22/06 SEG",
+            "kickoff": "20:00",
+            "venue": "Los Angeles",
+            "home": {
+                  "name": "Países Baixos",
+                  "flag": "🇳🇱"
+            },
+            "away": {
+                  "name": "Áustria",
+                  "flag": "🇦🇹"
+            }
+      },
+      {
+            "id": "J4",
+            "group": "J",
+            "badgeColor": "#546e7a",
+            "date": "23/06 TER",
+            "kickoff": "22:00",
+            "venue": "Boston",
+            "home": {
+                  "name": "Arábia Saudita",
+                  "flag": "🇸🇦"
+            },
+            "away": {
+                  "name": "Honduras",
+                  "flag": "🇭🇳"
+            }
+      },
+      {
+            "id": "K1",
+            "group": "K",
+            "badgeColor": "#0097a7",
+            "date": "21/06 DOM",
+            "kickoff": "13:00",
+            "venue": "Filadélfia",
+            "home": {
+                  "name": "Bélgica",
+                  "flag": "🇧🇪"
+            },
+            "away": {
+                  "name": "Qatar",
+                  "flag": "🇶🇦"
+            }
+      },
+      {
+            "id": "K2",
+            "group": "K",
+            "badgeColor": "#0097a7",
+            "date": "22/06 SEG",
+            "kickoff": "16:00",
+            "venue": "Kansas City",
+            "home": {
+                  "name": "Suécia",
+                  "flag": "🇸🇪"
+            },
+            "away": {
+                  "name": "Paraguai",
+                  "flag": "🇵🇾"
+            }
+      },
+      {
+            "id": "K3",
+            "group": "K",
+            "badgeColor": "#0097a7",
+            "date": "23/06 TER",
+            "kickoff": "19:00",
+            "venue": "Cidade do México",
+            "home": {
+                  "name": "Bélgica",
+                  "flag": "🇧🇪"
+            },
+            "away": {
+                  "name": "Suécia",
+                  "flag": "🇸🇪"
+            }
+      },
+      {
+            "id": "K4",
+            "group": "K",
+            "badgeColor": "#0097a7",
+            "date": "23/06 TER",
+            "kickoff": "22:00",
+            "venue": "Guadalajara",
+            "home": {
+                  "name": "Qatar",
+                  "flag": "🇶🇦"
+            },
+            "away": {
+                  "name": "Paraguai",
+                  "flag": "🇵🇾"
+            }
+      },
+      {
+            "id": "L1",
+            "group": "L",
+            "badgeColor": "#7cb342",
+            "date": "21/06 DOM",
+            "kickoff": "14:00",
+            "venue": "Toronto",
+            "home": {
+                  "name": "Itália",
+                  "flag": "🇮🇹"
+            },
+            "away": {
+                  "name": "Nova Zelândia",
+                  "flag": "🇳🇿"
+            }
+      },
+      {
+            "id": "L2",
+            "group": "L",
+            "badgeColor": "#7cb342",
+            "date": "22/06 SEG",
+            "kickoff": "17:00",
+            "venue": "Vancouver",
+            "home": {
+                  "name": "Turquia",
+                  "flag": "🇹🇷"
+            },
+            "away": {
+                  "name": "Costa do Marfim",
+                  "flag": "🇨🇮"
+            }
+      },
+      {
+            "id": "L3",
+            "group": "L",
+            "badgeColor": "#7cb342",
+            "date": "23/06 TER",
+            "kickoff": "20:00",
+            "venue": "Monterrey",
+            "home": {
+                  "name": "Itália",
+                  "flag": "🇮🇹"
+            },
+            "away": {
+                  "name": "Turquia",
+                  "flag": "🇹🇷"
+            }
+      },
+      {
+            "id": "L4",
+            "group": "L",
+            "badgeColor": "#7cb342",
+            "date": "23/06 TER",
+            "kickoff": "22:00",
+            "venue": "Dallas",
+            "home": {
+                  "name": "Nova Zelândia",
+                  "flag": "🇳🇿"
+            },
+            "away": {
+                  "name": "Costa do Marfim",
+                  "flag": "🇨🇮"
+            }
+      }
+];
+    const state = { activeGroup:'Todos', search:'', scores:{}, apiMode:'loading', apiMessage:'Aguardando primeira resposta da API.', lastSyncLabel:'aguardando API' };
+    const byId = (id) => document.getElementById(id);
+    const normalizeText = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const storageKey = (gameId, field) => `${gameId}.${field}`;
+    function safeSetStorage(key, value) { try { localStorage.setItem(key, String(value)); } catch (error) { console.warn('Não foi possível persistir no localStorage:', key, error); } }
+    function safeGetStorage(key) { try { return localStorage.getItem(key); } catch (error) { console.warn('Não foi possível ler do localStorage:', key, error); return null; } }
+    function persistScore(gameId, score) { safeSetStorage(storageKey(gameId,'home'), score.home === null ? 'null' : score.home); safeSetStorage(storageKey(gameId,'away'), score.away === null ? 'null' : score.away); safeSetStorage(storageKey(gameId,'finished'), score.status === 'finished'); safeSetStorage(storageKey(gameId,'status'), score.status); safeSetStorage(storageKey(gameId,'updatedAt'), new Date().toISOString()); }
+    function parseScore(raw) {
+      if (!raw || typeof raw !== 'object') return null;
+      const status = raw.status === 'live' || raw.status === 'finished' || raw.status === 'pending' ? raw.status : 'pending';
+      if ((raw.home === null || raw.home === undefined) && (raw.away === null || raw.away === undefined)) return { home: null, away: null, status: 'pending' };
+      if (raw.home === null || raw.home === undefined || raw.away === null || raw.away === undefined) return null;
+      const home = typeof raw.home === 'number' ? raw.home : Number(raw.home);
+      const away = typeof raw.away === 'number' ? raw.away : Number(raw.away);
+      return Number.isInteger(home) && Number.isInteger(away) ? { home, away, status } : null;
+    }
+    function parseStoredScoreValue(raw) {
+      if (raw === 'null' || raw === '' || raw === null || raw === undefined) return null;
+      const value = Number(raw);
+      return Number.isInteger(value) ? value : Number.NaN;
+    }
+    function loadScoresFromStorage() {
+      const recovered = {};
+      MATCHES.forEach((match) => {
+        const homeRaw = safeGetStorage(storageKey(match.id, 'home')), awayRaw = safeGetStorage(storageKey(match.id, 'away'));
+        if (homeRaw === null || awayRaw === null) return;
+        const finishedRaw = safeGetStorage(storageKey(match.id, 'finished')), statusRaw = safeGetStorage(storageKey(match.id, 'status'));
+        const home = parseStoredScoreValue(homeRaw), away = parseStoredScoreValue(awayRaw);
+        if (home === null && away === null) { recovered[match.id] = { home: null, away: null, status: 'pending' }; return; }
+        if (!Number.isInteger(home) || !Number.isInteger(away)) return;
+        recovered[match.id] = { home, away, status: statusRaw === 'live' || statusRaw === 'finished' || statusRaw === 'pending' ? statusRaw : (finishedRaw === 'true' ? 'finished' : 'pending') };
+      });
+      state.scores = { ...recovered, ...state.scores };
+      return recovered;
+    }
+    const getScore = (matchId) => state.scores[matchId] || { home:null, away:null, status:'pending' };
+    function getFilteredMatches() { const term = normalizeText(state.search); return MATCHES.filter((match) => (state.activeGroup === 'Todos' || match.group === state.activeGroup) && (!term || normalizeText(`${match.home.name} ${match.away.name}`).includes(term))); }
+    function setApiState(mode, message) { state.apiMode = mode; state.apiMessage = message; const pill = byId('api-status-pill'); pill.className = `status-pill ${mode}`; pill.textContent = mode === 'online' ? 'API ao vivo' : mode === 'fallback' ? 'Fallback localStorage' : 'Atualizando API'; byId('api-status-copy').textContent = message; }
+    function updateLastSync(label) { state.lastSyncLabel = label; byId('last-sync').textContent = `Última sincronização: ${label}`; }
+    function renderFilters() {
+      const filters = ['Todos', ...Object.keys(GROUP_COLORS)];
+      const container = byId('group-filters');
+      container.innerHTML = filters.map((filter) => {
+        const active = filter === state.activeGroup ? 'active' : '';
+        const label = filter === 'Todos' ? 'Todos' : `Grupo ${filter}`;
+        const color = GROUP_COLORS[filter] || 'rgba(255,255,255,.04)';
+        return `<button type="button" class="filter-chip ${active}" data-filter="${filter}" ${filter !== 'Todos' ? `style="box-shadow: inset 0 0 0 1px ${color}55;"` : ''}>${label}</button>`;
+      }).join('');
+      container.querySelectorAll('[data-filter]').forEach((button) => button.addEventListener('click', () => { state.activeGroup = button.dataset.filter; renderFilters(); renderSchedule(); }));
+    }
+    const statusLabel = (status) => status === 'live' ? 'AO VIVO' : status === 'finished' ? 'ENCERRADO' : 'AGUARDANDO';
+    const escapeHtml = (value) => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const formatScore = (value) => Number.isInteger(value) ? String(value) : '—';
+    function renderSchedule() {
+      const filteredMatches = getFilteredMatches();
+      const counts = MATCHES.reduce((acc, match) => { acc[getScore(match.id).status] += 1; return acc; }, { live:0, finished:0, pending:0 });
+      byId('hero-total').textContent = `${MATCHES.length} jogos`;
+      byId('visible-count').textContent = String(filteredMatches.length);
+      byId('live-count').textContent = String(counts.live);
+      byId('finished-count').textContent = String(counts.finished);
+      byId('pending-count').textContent = String(counts.pending);
+      byId('filtered-label').textContent = `Exibindo ${filteredMatches.length} de ${MATCHES.length} jogos`;
+      if (!filteredMatches.length) { byId('schedule').innerHTML = ''; byId('empty-state').hidden = false; return; }
+      byId('empty-state').hidden = true;
+      byId('schedule').innerHTML = filteredMatches.map((match, index) => {
+        const score = getScore(match.id);
+        const scoreStatusClass = escapeHtml(score.status);
+        return `<article class="match-card" data-match-id="${match.id}">
+          <div class="card-top">
+            <span class="group-badge" style="background:${match.badgeColor};">Grupo ${match.group}</span>
+            <span class="status-badge ${scoreStatusClass}">${statusLabel(score.status)}</span>
+          </div>
+          <div class="date-block"><strong>${escapeHtml(match.date)}</strong><span>${escapeHtml(match.kickoff)} • ${escapeHtml(match.venue)}</span></div>
+          <div class="teams">
+            <div class="team-row"><div class="team-name"><span class="flag">${escapeHtml(match.home.flag)}</span><span>${escapeHtml(match.home.name)}</span></div><div class="score-box ${scoreStatusClass}">${formatScore(score.home)}</div></div>
+            <div class="team-row"><div class="team-name"><span class="flag">${escapeHtml(match.away.flag)}</span><span>${escapeHtml(match.away.name)}</span></div><div class="score-box ${scoreStatusClass}">${formatScore(score.away)}</div></div>
+          </div>
+          <div class="match-meta">
+            <div class="meta-block"><span class="meta-label">Jogo</span><span class="meta-value">${escapeHtml(match.id)}</span></div>
+            <div class="meta-block"><span class="meta-label">Rodada</span><span class="meta-value">Grupo ${match.group}</span></div>
+          </div>
+          <div class="card-footer"><span class="result-caption">Placar vindo da API ou do cache local.</span><span class="counter">#${String(index + 1).padStart(2, '0')}</span></div>
+        </article>`;
+      }).join('');
+    }
+    async function fetchLiveScores() {
+      setApiState('loading', 'Consultando /api/copa2026/scores para atualizar os placares em tempo real...');
+      try {
+        const response = await fetch('/api/copa2026/scores', { method:'GET', headers:{ Accept:'application/json' }, cache:'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const payload = await response.json();
+        const scores = payload && typeof payload === 'object' && !Array.isArray(payload) ? ((payload.scores && typeof payload.scores === 'object' && !Array.isArray(payload.scores)) ? payload.scores : payload) : null;
+        if (!scores) throw new Error('Formato JSON inválido');
+        Object.entries(scores).forEach(([gameId, rawScore]) => { const parsed = parseScore(rawScore); if (!parsed) return; state.scores[gameId] = parsed; persistScore(gameId, parsed); });
+        updateLastSync(new Date().toLocaleString('pt-BR'));
+        setApiState('online', 'Placares recebidos com sucesso pela API. Atualização automática a cada 60 segundos.');
+      } catch (error) {
+        loadScoresFromStorage();
+        setApiState('fallback', 'API indisponível no momento. Exibindo o último placar salvo em localStorage sem interromper a página.');
+        console.warn('Falha ao buscar placares ao vivo, usando fallback local:', error);
+      } finally { renderSchedule(); }
+    }
+    function validateSchedule() { if (MATCHES.length !== 48) throw new Error(`A página precisa de 48 jogos, mas recebeu ${MATCHES.length}.`); }
+    function boot() {
+      validateSchedule();
+      loadScoresFromStorage();
+      renderFilters();
+      renderSchedule();
+      byId('team-search').addEventListener('input', (event) => { state.search = event.target.value || ''; renderSchedule(); });
+      byId('manual-refresh').addEventListener('click', fetchLiveScores);
+      fetchLiveScores();
+      setInterval(fetchLiveScores, 60000);
+    }
+    window.fetchLiveScores = fetchLiveScores;
+    window.renderSchedule = renderSchedule;
+    window.addEventListener('DOMContentLoaded', boot);
+  </script>
+</body>
+</html>

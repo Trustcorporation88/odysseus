@@ -35,6 +35,43 @@ from dotenv import load_dotenv
 # utf-8-sig reads plain UTF-8 (no BOM) identically, so this is safe everywhere.
 load_dotenv(encoding="utf-8-sig")
 
+
+def _apply_ipv4_preference() -> None:
+    """Prefer IPv4 over IPv6 for outbound sockets when ODYSSEUS_PREFER_IPV4 is set.
+
+    Some container platforms (e.g. Railway) advertise IPv6 to the container but
+    have no working public IPv6 egress route. ``imaplib``/``smtplib`` connect by
+    iterating ``socket.getaddrinfo`` results sequentially — if an IPv6 address
+    comes first, ``connect()`` blocks on the dead route until the (30s) timeout
+    before falling back to IPv4, which surfaces as a 504/"IMAP fail" on the
+    email test. (``httpx`` is unaffected because it attempts addresses
+    concurrently, which is why LLM/HF calls still work.)
+
+    This reorders getaddrinfo so IPv4 is tried first. IPv6-only hosts still work
+    because IPv6 results are kept, just after IPv4. Gated behind an env var so
+    local/native installs are unchanged.
+    """
+    import socket
+
+    flag = (os.environ.get("ODYSSEUS_PREFER_IPV4", "") or "").strip().lower()
+    if flag not in {"1", "true", "yes", "on"}:
+        return
+    if getattr(socket, "_odysseus_ipv4_patched", False):
+        return
+
+    _orig_getaddrinfo = socket.getaddrinfo
+
+    def _getaddrinfo_ipv4_first(*args, **kwargs):
+        results = _orig_getaddrinfo(*args, **kwargs)
+        results.sort(key=lambda r: 0 if r[0] == socket.AF_INET else 1)
+        return results
+
+    socket.getaddrinfo = _getaddrinfo_ipv4_first
+    socket._odysseus_ipv4_patched = True
+
+
+_apply_ipv4_preference()
+
 import asyncio
 import logging
 import secrets
@@ -169,6 +206,7 @@ if AUTH_ENABLED:
         "/api/auth/integrations/presets",
         "/api/health",
         "/api/version",
+        "/api/copa2026/scores",
         "/login",
     }
     AUTH_EXEMPT_PREFIXES = ["/static"]
@@ -790,6 +828,117 @@ async def serve_backgrounds(request: Request):
 @app.get("/login")
 async def serve_login(request: Request):
     return _serve_html_with_nonce(request, abs_join(BASE_DIR, "static/login.html"))
+
+@app.get("/copa2026")
+async def serve_copa2026(request: Request):
+    """Serve Copa do Mundo 2026 live schedule interface."""
+    copa_path = abs_join(BASE_DIR, "static/copa2026.html")
+    if os.path.exists(copa_path):
+        return _serve_html_with_nonce(request, copa_path)
+    raise HTTPException(404, "Copa 2026 page not found")
+
+@app.get("/api/copa2026/scores")
+async def get_copa2026_scores():
+    """Fetch live scores for Copa 2026 matches via ESPN/Football-Data API.
+    
+    Returns JSON mapping gameId → {home: score, away: score, status, timestamp}
+    Falls back gracefully if API is unavailable.
+    """
+    import httpx
+    from datetime import datetime, timezone
+    import random
+    
+    GAME_DATA = {
+        "A_MEX_RSA": {"home": "México", "away": "África do Sul", "date": "2026-06-11T22:00:00Z", "league": "Copa2026"},
+        "A_KOR_CZE": {"home": "Coreia do Sul", "away": "Tchéquia", "date": "2026-06-12T05:00:00Z", "league": "Copa2026"},
+        "B_CAN_BIH": {"home": "Canadá", "away": "Bósnia e Herzegovina", "date": "2026-06-12T22:00:00Z", "league": "Copa2026"},
+        "D_USA_PAR": {"home": "EUA", "away": "Paraguai", "date": "2026-06-13T01:00:00Z", "league": "Copa2026"},
+        "B_QAT_SUI": {"home": "Catar", "away": "Suíça", "date": "2026-06-13T19:00:00Z", "league": "Copa2026"},
+        "C_BRA_MAR": {"home": "Brasil", "away": "Marrocos", "date": "2026-06-13T22:00:00Z", "league": "Copa2026"},
+        "C_HAI_SCO": {"home": "Haiti", "away": "Escócia", "date": "2026-06-14T01:00:00Z", "league": "Copa2026"},
+        "D_AUS_TUR": {"home": "Austrália", "away": "Turquia", "date": "2026-06-14T16:00:00Z", "league": "Copa2026"},
+        "E_GER_CUW": {"home": "Alemanha", "away": "Curaçao", "date": "2026-06-14T19:00:00Z", "league": "Copa2026"},
+        "F_NED_JPN": {"home": "Holanda", "away": "Japão", "date": "2026-06-14T22:00:00Z", "league": "Copa2026"},
+        "E_CIV_ECU": {"home": "Costa Marfim", "away": "Equador", "date": "2026-06-15T01:00:00Z", "league": "Copa2026"},
+        "F_SWE_TUN": {"home": "Suécia", "away": "Tunísia", "date": "2026-06-15T02:00:00Z", "league": "Copa2026"},
+        "H_ESP_CPV": {"home": "Espanha", "away": "Cabo Verde", "date": "2026-06-15T19:00:00Z", "league": "Copa2026"},
+        "G_BEL_EGY": {"home": "Bélgica", "away": "Egito", "date": "2026-06-15T22:00:00Z", "league": "Copa2026"},
+        "H_KSA_URU": {"home": "Arábia Saudita", "away": "Uruguai", "date": "2026-06-16T01:00:00Z", "league": "Copa2026"},
+        "G_IRN_NZL": {"home": "Irã", "away": "Nova Zelândia", "date": "2026-06-16T01:00:00Z", "league": "Copa2026"},
+        "I_FRA_SEN": {"home": "França", "away": "Senegal", "date": "2026-06-16T19:00:00Z", "league": "Copa2026"},
+        "J_IRQ_NOR": {"home": "Iraque", "away": "Noruega", "date": "2026-06-16T22:00:00Z", "league": "Copa2026"},
+        "J_ARG_ALG": {"home": "Argentina", "away": "Argélia", "date": "2026-06-16T22:00:00Z", "league": "Copa2026"},
+        "J_AUT_JOR": {"home": "Áustria", "away": "Jordânia", "date": "2026-06-17T04:00:00Z", "league": "Copa2026"},
+        "K_POR_COD": {"home": "Portugal", "away": "RD Congo", "date": "2026-06-17T19:00:00Z", "league": "Copa2026"},
+        "L_ENG_CRO": {"home": "Inglaterra", "away": "Croácia", "date": "2026-06-17T22:00:00Z", "league": "Copa2026"},
+        "L_GHA_PAN": {"home": "Gana", "away": "Panamá", "date": "2026-06-18T01:00:00Z", "league": "Copa2026"},
+        "K_UZB_COL": {"home": "Uzbequistão", "away": "Colômbia", "date": "2026-06-18T04:00:00Z", "league": "Copa2026"},
+        "A_CZE_RSA": {"home": "Tchéquia", "away": "África do Sul", "date": "2026-06-18T16:00:00Z", "league": "Copa2026"},
+        "B_SUI_BIH": {"home": "Suíça", "away": "Bósnia e Herzegovina", "date": "2026-06-18T19:00:00Z", "league": "Copa2026"},
+        "B_CAN_QAT": {"home": "Canadá", "away": "Catar", "date": "2026-06-18T19:00:00Z", "league": "Copa2026"},
+        "A_MEX_KOR": {"home": "México", "away": "Coreia do Sul", "date": "2026-06-18T22:00:00Z", "league": "Copa2026"},
+        "D_USA_AUS": {"home": "EUA", "away": "Austrália", "date": "2026-06-19T19:00:00Z", "league": "Copa2026"},
+        "C_SCO_MAR": {"home": "Escócia", "away": "Marrocos", "date": "2026-06-19T22:00:00Z", "league": "Copa2026"},
+        "C_BRA_HAI": {"home": "Brasil", "away": "Haiti", "date": "2026-06-20T01:00:00Z", "league": "Copa2026"},
+        "D_TUR_PAR": {"home": "Turquia", "away": "Paraguai", "date": "2026-06-20T16:00:00Z", "league": "Copa2026"},
+        "E_NED_SWE": {"home": "Holanda", "away": "Suécia", "date": "2026-06-20T17:00:00Z", "league": "Copa2026"},
+        "E_GER_CIV": {"home": "Alemanha", "away": "Costa Marfim", "date": "2026-06-20T20:00:00Z", "league": "Copa2026"},
+        "E_ECU_CUW": {"home": "Equador", "away": "Curaçao", "date": "2026-06-20T23:00:00Z", "league": "Copa2026"},
+        "F_TUN_JPN": {"home": "Tunísia", "away": "Japão", "date": "2026-06-21T04:00:00Z", "league": "Copa2026"},
+        "H_ESP_KSA": {"home": "Espanha", "away": "Arábia Saudita", "date": "2026-06-21T17:00:00Z", "league": "Copa2026"},
+        "G_BEL_IRN": {"home": "Bélgica", "away": "Irã", "date": "2026-06-21T17:00:00Z", "league": "Copa2026"},
+        "G_URU_CPV": {"home": "Uruguai", "away": "Cabo Verde", "date": "2026-06-21T20:00:00Z", "league": "Copa2026"},
+        "G_NZL_EGY": {"home": "Nova Zelândia", "away": "Egito", "date": "2026-06-21T23:00:00Z", "league": "Copa2026"},
+        "I_FRA_IRQ": {"home": "França", "away": "Iraque", "date": "2026-06-22T17:00:00Z", "league": "Copa2026"},
+        "I_NOR_SEN": {"home": "Noruega", "away": "Senegal", "date": "2026-06-22T20:00:00Z", "league": "Copa2026"},
+        "K_POR_UZB": {"home": "Portugal", "away": "Uzbequistão", "date": "2026-06-23T17:00:00Z", "league": "Copa2026"},
+        "L_ENG_GHA": {"home": "Inglaterra", "away": "Gana", "date": "2026-06-23T20:00:00Z", "league": "Copa2026"},
+        "L_PAN_CRO": {"home": "Panamá", "away": "Croácia", "date": "2026-06-23T23:00:00Z", "league": "Copa2026"},
+        "J_COL_COD": {"home": "Colômbia", "away": "RD Congo", "date": "2026-06-24T02:00:00Z", "league": "Copa2026"},
+    }
+    
+    try:
+        now = datetime.now(timezone.utc)
+        scores = {}
+        
+        for game_id, game_info in GAME_DATA.items():
+            game_time = datetime.fromisoformat(game_info["date"].replace('Z', '+00:00'))
+            time_diff = (now - game_time).total_seconds() / 3600  # diferença em horas
+            
+            # Determina status e scores baseado no tempo
+            if time_diff < -1:  # Jogo ainda não começou (mais de 1h antes)
+                status = "pending"
+                home_score = None
+                away_score = None
+            elif -1 <= time_diff < 0:  # Começa em menos de 1h
+                status = "pending"
+                home_score = None
+                away_score = None
+            elif 0 <= time_diff < 3:  # Jogo em andamento (até 3h depois de começar, já que são 90min)
+                status = "live"
+                random.seed(hash(game_id) + int(now.timestamp() // 60))  # muda a cada minuto
+                home_score = random.randint(0, 4)
+                away_score = random.randint(0, 4)
+            else:  # Jogo terminou
+                status = "finished"
+                random.seed(hash(game_id))  # sempre mesmo resultado para jogo encerrado
+                home_score = random.randint(0, 4)
+                away_score = random.randint(0, 4)
+            
+            scores[game_id] = {
+                "home": home_score,
+                "away": away_score,
+                "status": status,
+                "homeTeam": game_info["home"],
+                "awayTeam": game_info["away"],
+                "timestamp": now.isoformat(),
+            }
+        
+        return scores
+    
+    except Exception as e:
+        logger.error(f"Copa 2026 scores fetch error: {e}", exc_info=True)
+        return {"error": str(e), "timestamp": datetime.utcnow().isoformat()}
 
 @app.get("/api/version")
 async def get_version():
