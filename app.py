@@ -840,14 +840,13 @@ async def serve_copa2026(request: Request):
 
 @app.get("/api/copa2026/scores")
 async def get_copa2026_scores():
-    """Fetch live scores for Copa 2026 matches via ESPN/Football-Data API.
-    
-    Returns JSON mapping gameId → {home: score, away: score, status, timestamp}
-    Falls back gracefully if API is unavailable.
+    """Fetch live scores for Copa 2026 matches.
+
+    Uses ESPN's public scoreboard endpoint for live/finished matches and falls
+    back to the local schedule model for fixtures ESPN does not return yet.
     """
     import httpx
-    from datetime import datetime, timezone
-    import random
+    from datetime import datetime, timedelta, timezone
     
     GAME_DATA = {
         "A_MEX_RSA": {"home": "México", "away": "África do Sul", "date": "2026-06-11T22:00:00Z", "league": "Copa2026"},
@@ -898,48 +897,109 @@ async def get_copa2026_scores():
         "J_COL_COD": {"home": "Colômbia", "away": "RD Congo", "date": "2026-06-24T02:00:00Z", "league": "Copa2026"},
     }
     
-    try:
-        now = datetime.now(timezone.utc)
-        scores = {}
-        
-        for game_id, game_info in GAME_DATA.items():
-            game_time = datetime.fromisoformat(game_info["date"].replace('Z', '+00:00'))
-            time_diff = (now - game_time).total_seconds() / 3600  # diferença em horas
-            
-            # Determina status e scores baseado no tempo
-            if time_diff < -1:  # Jogo ainda não começou (mais de 1h antes)
-                status = "pending"
-                home_score = None
-                away_score = None
-            elif -1 <= time_diff < 0:  # Começa em menos de 1h
-                status = "pending"
-                home_score = None
-                away_score = None
-            elif 0 <= time_diff < 3:  # Jogo em andamento (até 3h depois de começar, já que são 90min)
-                status = "live"
-                random.seed(hash(game_id) + int(now.timestamp() // 60))  # muda a cada minuto
-                home_score = random.randint(0, 4)
-                away_score = random.randint(0, 4)
-            else:  # Jogo terminou
-                status = "finished"
-                random.seed(hash(game_id))  # sempre mesmo resultado para jogo encerrado
-                home_score = random.randint(0, 4)
-                away_score = random.randint(0, 4)
-            
-            scores[game_id] = {
+    def fallback_score(game_id: str, game_info: dict, now: datetime) -> dict:
+        game_time = datetime.fromisoformat(game_info["date"].replace("Z", "+00:00"))
+        time_diff = (now - game_time).total_seconds() / 3600
+        if time_diff < 0:
+            status = "pending"
+            home_score = None
+            away_score = None
+        elif time_diff < 3:
+            status = "live"
+            home_score = None
+            away_score = None
+        else:
+            status = "finished"
+            home_score = None
+            away_score = None
+        return {
+            "home": home_score,
+            "away": away_score,
+            "status": status,
+            "homeTeam": game_info["home"],
+            "awayTeam": game_info["away"],
+            "timestamp": now.isoformat(),
+        }
+
+    def espn_status(status_obj: dict) -> str:
+        status_type = (status_obj or {}).get("type") or {}
+        if status_type.get("completed"):
+            return "finished"
+        state = status_type.get("state")
+        if state == "in":
+            return "live"
+        if state == "post":
+            return "finished"
+        return "pending"
+
+    def parse_espn_event(event: dict, now: datetime) -> tuple[str, dict] | None:
+        competition = ((event or {}).get("competitions") or [{}])[0]
+        competitors = competition.get("competitors") or []
+        home = next((team for team in competitors if team.get("homeAway") == "home"), None)
+        away = next((team for team in competitors if team.get("homeAway") == "away"), None)
+        if not home or not away:
+            return None
+        home_abbr = ((home.get("team") or {}).get("abbreviation") or "").upper()
+        away_abbr = ((away.get("team") or {}).get("abbreviation") or "").upper()
+        if not home_abbr or not away_abbr:
+            return None
+        status = espn_status(event.get("status") or competition.get("status") or {})
+        home_score = None if status == "pending" else int(home.get("score") or 0)
+        away_score = None if status == "pending" else int(away.get("score") or 0)
+        return (
+            f"{home_abbr}_{away_abbr}",
+            {
                 "home": home_score,
                 "away": away_score,
                 "status": status,
-                "homeTeam": game_info["home"],
-                "awayTeam": game_info["away"],
+                "homeTeam": (home.get("team") or {}).get("displayName") or home_abbr,
+                "awayTeam": (away.get("team") or {}).get("displayName") or away_abbr,
                 "timestamp": now.isoformat(),
-            }
-        
+            },
+        )
+
+    now = datetime.now(timezone.utc)
+    scores = {
+        game_id: fallback_score(game_id, game_info, now)
+        for game_id, game_info in GAME_DATA.items()
+    }
+
+    try:
+        live_events: dict[str, dict] = {}
+        dates_to_query = {
+            (now + timedelta(days=offset)).strftime("%Y%m%d")
+            for offset in (-1, 0, 1)
+        }
+        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
+            for date_code in sorted(dates_to_query):
+                response = await client.get(
+                    "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard",
+                    params={"dates": date_code},
+                    headers={"Accept": "application/json"},
+                )
+                response.raise_for_status()
+                payload = response.json()
+                for event in payload.get("events") or []:
+                    parsed = parse_espn_event(event, now)
+                    if parsed is None:
+                        continue
+                    key, value = parsed
+                    live_events[key] = value
+
+        for game_id, game_info in GAME_DATA.items():
+            _, home_code, away_code = game_id.split("_", 2)
+            espn_match = live_events.get(f"{home_code}_{away_code}")
+            if espn_match:
+                scores[game_id] = {
+                    **espn_match,
+                    "homeTeam": game_info["home"],
+                    "awayTeam": game_info["away"],
+                }
         return scores
-    
+
     except Exception as e:
         logger.error(f"Copa 2026 scores fetch error: {e}", exc_info=True)
-        return {"error": str(e), "timestamp": datetime.utcnow().isoformat()}
+        return scores
 
 @app.get("/api/version")
 async def get_version():
