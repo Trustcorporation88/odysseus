@@ -76,7 +76,10 @@
     .score-box.pending { background:rgba(148,163,184,.08); border-color:rgba(148,163,184,.24); color:#e2e8f0; }
     .score-box.live { background:rgba(204,0,0,.12); border-color:rgba(204,0,0,.34); color:#ffd6d6; animation:pulse-live 1.4s ease-in-out infinite; }
     .score-box.finished { background:rgba(26,102,50,.12); border-color:rgba(26,102,50,.32); color:#d9f2e2; }
+    .match-card.goal-flash { border-color:rgba(255,215,0,.72); box-shadow:0 0 0 2px rgba(255,215,0,.28), var(--shadow); }
+    .score-box.goal-flash { animation:goal-flash 1.6s ease; border-color:#FFD700; color:#fff4b3; }
     @keyframes pulse-live { 0%, 100% { box-shadow:0 0 0 0 rgba(204,0,0,.18); } 50% { box-shadow:0 0 0 8px rgba(204,0,0,.02); } }
+    @keyframes goal-flash { 0% { transform:scale(1); box-shadow:0 0 0 0 rgba(255,215,0,.55); } 35% { transform:scale(1.08); box-shadow:0 0 0 10px rgba(255,215,0,0); } 100% { transform:scale(1); } }
     .match-meta { padding-top:14px; border-top:1px solid rgba(255,255,255,.08); color:var(--muted); font-size:.9rem; }
     .meta-block { display:flex; flex-direction:column; gap:3px; min-width:0; }
     .meta-value { color:var(--text); font-size:.92rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
@@ -94,11 +97,11 @@
     <section class="hero">
       <div>
         <span class="eyebrow">Odysseus • Copa 2026</span>
-        <h1>Fase de grupos com placares automáticos a cada 60 segundos.</h1>
+        <h1>Fase de grupos com placares automáticos a cada 15 segundos.</h1>
         <p>Página dedicada aos 48 jogos da Copa 2026 com filtros por grupo, busca por seleção e integração direta com <strong>/api/copa2026/scores</strong>. Se a API ficar indisponível, o último estado salvo no navegador continua visível via localStorage.</p>
         <div class="hero-actions">
           <span class="pill">⚽ <strong id="hero-total">48 jogos</strong></span>
-          <span class="pill">🔄 <strong>refresh 60s</strong></span>
+          <span class="pill">🔄 <strong>refresh 15s</strong></span>
           <span class="pill">💾 <strong>fallback local</strong></span>
         </div>
         <small id="last-sync">Última sincronização: aguardando API</small>
@@ -929,6 +932,8 @@
             }
       }
 ];
+    const REFRESH_MS = 15000;
+    const GOAL_HIGHLIGHT_MS = 45000;
     const state = { activeGroup:'Todos', search:'', scores:{}, apiMode:'loading', apiMessage:'Aguardando primeira resposta da API.', lastSyncLabel:'aguardando API' };
     const byId = (id) => document.getElementById(id);
     const normalizeText = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -936,15 +941,16 @@
     const storageKey = (gameId, field) => `${gameId}.${field}`;
     function safeSetStorage(key, value) { try { localStorage.setItem(key, String(value)); } catch (error) { console.warn('Não foi possível persistir no localStorage:', key, error); } }
     function safeGetStorage(key) { try { return localStorage.getItem(key); } catch (error) { console.warn('Não foi possível ler do localStorage:', key, error); return null; } }
-    function persistScore(gameId, score) { safeSetStorage(storageKey(gameId,'home'), score.home === null ? 'null' : score.home); safeSetStorage(storageKey(gameId,'away'), score.away === null ? 'null' : score.away); safeSetStorage(storageKey(gameId,'finished'), score.status === 'finished'); safeSetStorage(storageKey(gameId,'status'), score.status); safeSetStorage(storageKey(gameId,'updatedAt'), new Date().toISOString()); }
+    function persistScore(gameId, score) { safeSetStorage(storageKey(gameId,'home'), score.home === null ? 'null' : score.home); safeSetStorage(storageKey(gameId,'away'), score.away === null ? 'null' : score.away); safeSetStorage(storageKey(gameId,'finished'), score.status === 'finished'); safeSetStorage(storageKey(gameId,'status'), score.status); safeSetStorage(storageKey(gameId,'detail'), score.detail || ''); safeSetStorage(storageKey(gameId,'updatedAt'), new Date().toISOString()); }
     function parseScore(raw) {
       if (!raw || typeof raw !== 'object') return null;
       const status = raw.status === 'live' || raw.status === 'finished' || raw.status === 'pending' ? raw.status : 'pending';
-      if ((raw.home === null || raw.home === undefined) && (raw.away === null || raw.away === undefined)) return { home: null, away: null, status: 'pending' };
+      const detail = typeof raw.detail === 'string' ? raw.detail : '';
+      if ((raw.home === null || raw.home === undefined) && (raw.away === null || raw.away === undefined)) return { home: null, away: null, status: 'pending', detail };
       if (raw.home === null || raw.home === undefined || raw.away === null || raw.away === undefined) return null;
       const home = typeof raw.home === 'number' ? raw.home : Number(raw.home);
       const away = typeof raw.away === 'number' ? raw.away : Number(raw.away);
-      return Number.isInteger(home) && Number.isInteger(away) ? { home, away, status } : null;
+      return Number.isInteger(home) && Number.isInteger(away) ? { home, away, status, detail } : null;
     }
     function parseStoredScoreValue(raw) {
       if (raw === 'null' || raw === '' || raw === null || raw === undefined) return null;
@@ -956,11 +962,11 @@
       MATCHES.forEach((match) => {
         const homeRaw = safeGetStorage(storageKey(match.id, 'home')), awayRaw = safeGetStorage(storageKey(match.id, 'away'));
         if (homeRaw === null || awayRaw === null) return;
-        const finishedRaw = safeGetStorage(storageKey(match.id, 'finished')), statusRaw = safeGetStorage(storageKey(match.id, 'status'));
+        const finishedRaw = safeGetStorage(storageKey(match.id, 'finished')), statusRaw = safeGetStorage(storageKey(match.id, 'status')), detailRaw = safeGetStorage(storageKey(match.id, 'detail'));
         const home = parseStoredScoreValue(homeRaw), away = parseStoredScoreValue(awayRaw);
-        if (home === null && away === null) { recovered[match.id] = { home: null, away: null, status: 'pending' }; return; }
+        if (home === null && away === null) { recovered[match.id] = { home: null, away: null, status: 'pending', detail: detailRaw || '' }; return; }
         if (!Number.isInteger(home) || !Number.isInteger(away)) return;
-        recovered[match.id] = { home, away, status: statusRaw === 'live' || statusRaw === 'finished' || statusRaw === 'pending' ? statusRaw : (finishedRaw === 'true' ? 'finished' : 'pending') };
+        recovered[match.id] = { home, away, detail: detailRaw || '', status: statusRaw === 'live' || statusRaw === 'finished' || statusRaw === 'pending' ? statusRaw : (finishedRaw === 'true' ? 'finished' : 'pending') };
       });
       state.scores = { ...recovered, ...state.scores };
       return recovered;
@@ -968,7 +974,7 @@
     function getScore(match) {
       return state.scores[match.id]
         || state.scores[teamKey(match.home.name, match.away.name)]
-        || { home:null, away:null, status:'pending' };
+        || { home:null, away:null, status:'pending', detail:'' };
     }
     function getFilteredMatches() { const term = normalizeText(state.search); return MATCHES.filter((match) => (state.activeGroup === 'Todos' || match.group === state.activeGroup) && (!term || normalizeText(`${match.home.name} ${match.away.name}`).includes(term))); }
     function setApiState(mode, message) { state.apiMode = mode; state.apiMessage = message; const pill = byId('api-status-pill'); pill.className = `status-pill ${mode}`; pill.textContent = mode === 'online' ? 'API ao vivo' : mode === 'fallback' ? 'Fallback localStorage' : 'Atualizando API'; byId('api-status-copy').textContent = message; }
@@ -984,7 +990,10 @@
       }).join('');
       container.querySelectorAll('[data-filter]').forEach((button) => button.addEventListener('click', () => { state.activeGroup = button.dataset.filter; renderFilters(); renderSchedule(); }));
     }
-    const statusLabel = (status) => status === 'live' ? 'AO VIVO' : status === 'finished' ? 'ENCERRADO' : 'AGUARDANDO';
+    const statusLabel = (status, detail) => {
+      const base = status === 'live' ? 'AO VIVO' : status === 'finished' ? 'ENCERRADO' : 'AGUARDANDO';
+      return detail ? `${base} · ${detail}` : base;
+    };
     const escapeHtml = (value) => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     const formatScore = (value) => Number.isInteger(value) ? String(value) : '—';
     function renderSchedule() {
@@ -1001,15 +1010,16 @@
       byId('schedule').innerHTML = filteredMatches.map((match, index) => {
         const score = getScore(match);
         const scoreStatusClass = escapeHtml(score.status);
-        return `<article class="match-card" data-match-id="${match.id}">
+        const goalRecent = Number.isFinite(score.goalAt) && (Date.now() - score.goalAt) < GOAL_HIGHLIGHT_MS;
+        return `<article class="match-card ${goalRecent ? 'goal-flash' : ''}" data-match-id="${match.id}">
           <div class="card-top">
             <span class="group-badge" style="background:${match.badgeColor};">Grupo ${match.group}</span>
-            <span class="status-badge ${scoreStatusClass}">${statusLabel(score.status)}</span>
+            <span class="status-badge ${scoreStatusClass}">${escapeHtml(statusLabel(score.status, score.detail))}</span>
           </div>
           <div class="date-block"><strong>${escapeHtml(match.date)}</strong><span>${escapeHtml(match.kickoff)} • ${escapeHtml(match.venue)}</span></div>
           <div class="teams">
-            <div class="team-row"><div class="team-name"><span class="flag">${escapeHtml(match.home.flag)}</span><span>${escapeHtml(match.home.name)}</span></div><div class="score-box ${scoreStatusClass}">${formatScore(score.home)}</div></div>
-            <div class="team-row"><div class="team-name"><span class="flag">${escapeHtml(match.away.flag)}</span><span>${escapeHtml(match.away.name)}</span></div><div class="score-box ${scoreStatusClass}">${formatScore(score.away)}</div></div>
+            <div class="team-row"><div class="team-name"><span class="flag">${escapeHtml(match.home.flag)}</span><span>${escapeHtml(match.home.name)}</span></div><div class="score-box ${scoreStatusClass} ${goalRecent && score.goalHome ? 'goal-flash' : ''}">${formatScore(score.home)}</div></div>
+            <div class="team-row"><div class="team-name"><span class="flag">${escapeHtml(match.away.flag)}</span><span>${escapeHtml(match.away.name)}</span></div><div class="score-box ${scoreStatusClass} ${goalRecent && score.goalAway ? 'goal-flash' : ''}">${formatScore(score.away)}</div></div>
           </div>
           <div class="match-meta">
             <div class="meta-block"><span class="meta-label">Jogo</span><span class="meta-value">${escapeHtml(match.id)}</span></div>
@@ -1027,21 +1037,29 @@
         const payload = await response.json();
         const scores = payload && typeof payload === 'object' && !Array.isArray(payload) ? ((payload.scores && typeof payload.scores === 'object' && !Array.isArray(payload.scores)) ? payload.scores : payload) : null;
         if (!scores) throw new Error('Formato JSON inválido');
+        const byTeams = new Map(Object.values(scores)
+          .filter((entry) => entry && typeof entry === 'object')
+          .map((entry) => [teamKey(entry.homeTeam, entry.awayTeam), entry]));
         MATCHES.forEach((match) => {
-          const rawScore = Object.values(scores).find((entry) =>
-            entry
-            && typeof entry === 'object'
-            && teamKey(entry.homeTeam, entry.awayTeam) === teamKey(match.home.name, match.away.name)
-          );
+          const rawScore = byTeams.get(teamKey(match.home.name, match.away.name));
           if (!rawScore) return;
           const parsed = parseScore(rawScore);
           if (!parsed) return;
-          state.scores[match.id] = parsed;
-          state.scores[teamKey(match.home.name, match.away.name)] = parsed;
-          persistScore(match.id, parsed);
+          const current = getScore(match);
+          const goalHome = Number.isInteger(current.home) && Number.isInteger(parsed.home) && parsed.home > current.home;
+          const goalAway = Number.isInteger(current.away) && Number.isInteger(parsed.away) && parsed.away > current.away;
+          const next = {
+            ...parsed,
+            goalHome,
+            goalAway,
+            goalAt: (goalHome || goalAway) ? Date.now() : current.goalAt
+          };
+          state.scores[match.id] = next;
+          state.scores[teamKey(match.home.name, match.away.name)] = next;
+          persistScore(match.id, next);
         });
         updateLastSync(new Date().toLocaleString('pt-BR'));
-        setApiState('online', 'Placares recebidos com sucesso pela API. Atualização automática a cada 60 segundos.');
+        setApiState('online', `Placares recebidos com sucesso pela API. Atualização automática a cada ${Math.floor(REFRESH_MS / 1000)} segundos.`);
       } catch (error) {
         loadScoresFromStorage();
         setApiState('fallback', 'API indisponível no momento. Exibindo o último placar salvo em localStorage sem interromper a página.');
@@ -1057,7 +1075,7 @@
       byId('team-search').addEventListener('input', (event) => { state.search = event.target.value || ''; renderSchedule(); });
       byId('manual-refresh').addEventListener('click', fetchLiveScores);
       fetchLiveScores();
-      setInterval(fetchLiveScores, 60000);
+      setInterval(fetchLiveScores, REFRESH_MS);
     }
     window.fetchLiveScores = fetchLiveScores;
     window.renderSchedule = renderSchedule;

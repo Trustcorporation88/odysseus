@@ -916,6 +916,7 @@ async def get_copa2026_scores():
             "home": home_score,
             "away": away_score,
             "status": status,
+            "detail": None,
             "homeTeam": game_info["home"],
             "awayTeam": game_info["away"],
             "timestamp": now.isoformat(),
@@ -943,7 +944,14 @@ async def get_copa2026_scores():
         away_abbr = ((away.get("team") or {}).get("abbreviation") or "").upper()
         if not home_abbr or not away_abbr:
             return None
-        status = espn_status(event.get("status") or competition.get("status") or {})
+        status_obj = event.get("status") or competition.get("status") or {}
+        status = espn_status(status_obj)
+        status_type = (status_obj.get("type") or {})
+        detail = (
+            status_type.get("shortDetail")
+            or status_type.get("detail")
+            or status_type.get("description")
+        )
         home_score = None if status == "pending" else int(home.get("score") or 0)
         away_score = None if status == "pending" else int(away.get("score") or 0)
         return (
@@ -952,6 +960,7 @@ async def get_copa2026_scores():
                 "home": home_score,
                 "away": away_score,
                 "status": status,
+                "detail": detail,
                 "homeTeam": (home.get("team") or {}).get("displayName") or home_abbr,
                 "awayTeam": (away.get("team") or {}).get("displayName") or away_abbr,
                 "timestamp": now.isoformat(),
