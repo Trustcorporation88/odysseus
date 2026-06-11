@@ -207,6 +207,7 @@ if AUTH_ENABLED:
         "/api/health",
         "/api/version",
         "/api/copa2026/scores",
+        "/copa2026",
         "/login",
     }
     AUTH_EXEMPT_PREFIXES = ["/static"]
