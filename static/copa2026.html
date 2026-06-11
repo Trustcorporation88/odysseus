@@ -932,6 +932,7 @@
     const state = { activeGroup:'Todos', search:'', scores:{}, apiMode:'loading', apiMessage:'Aguardando primeira resposta da API.', lastSyncLabel:'aguardando API' };
     const byId = (id) => document.getElementById(id);
     const normalizeText = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const teamKey = (home, away) => `${normalizeText(home)}__${normalizeText(away)}`;
     const storageKey = (gameId, field) => `${gameId}.${field}`;
     function safeSetStorage(key, value) { try { localStorage.setItem(key, String(value)); } catch (error) { console.warn('Não foi possível persistir no localStorage:', key, error); } }
     function safeGetStorage(key) { try { return localStorage.getItem(key); } catch (error) { console.warn('Não foi possível ler do localStorage:', key, error); return null; } }
@@ -964,7 +965,11 @@
       state.scores = { ...recovered, ...state.scores };
       return recovered;
     }
-    const getScore = (matchId) => state.scores[matchId] || { home:null, away:null, status:'pending' };
+    function getScore(match) {
+      return state.scores[match.id]
+        || state.scores[teamKey(match.home.name, match.away.name)]
+        || { home:null, away:null, status:'pending' };
+    }
     function getFilteredMatches() { const term = normalizeText(state.search); return MATCHES.filter((match) => (state.activeGroup === 'Todos' || match.group === state.activeGroup) && (!term || normalizeText(`${match.home.name} ${match.away.name}`).includes(term))); }
     function setApiState(mode, message) { state.apiMode = mode; state.apiMessage = message; const pill = byId('api-status-pill'); pill.className = `status-pill ${mode}`; pill.textContent = mode === 'online' ? 'API ao vivo' : mode === 'fallback' ? 'Fallback localStorage' : 'Atualizando API'; byId('api-status-copy').textContent = message; }
     function updateLastSync(label) { state.lastSyncLabel = label; byId('last-sync').textContent = `Última sincronização: ${label}`; }
@@ -984,7 +989,7 @@
     const formatScore = (value) => Number.isInteger(value) ? String(value) : '—';
     function renderSchedule() {
       const filteredMatches = getFilteredMatches();
-      const counts = MATCHES.reduce((acc, match) => { acc[getScore(match.id).status] += 1; return acc; }, { live:0, finished:0, pending:0 });
+      const counts = MATCHES.reduce((acc, match) => { acc[getScore(match).status] += 1; return acc; }, { live:0, finished:0, pending:0 });
       byId('hero-total').textContent = `${MATCHES.length} jogos`;
       byId('visible-count').textContent = String(filteredMatches.length);
       byId('live-count').textContent = String(counts.live);
@@ -994,7 +999,7 @@
       if (!filteredMatches.length) { byId('schedule').innerHTML = ''; byId('empty-state').hidden = false; return; }
       byId('empty-state').hidden = true;
       byId('schedule').innerHTML = filteredMatches.map((match, index) => {
-        const score = getScore(match.id);
+        const score = getScore(match);
         const scoreStatusClass = escapeHtml(score.status);
         return `<article class="match-card" data-match-id="${match.id}">
           <div class="card-top">
@@ -1022,7 +1027,19 @@
         const payload = await response.json();
         const scores = payload && typeof payload === 'object' && !Array.isArray(payload) ? ((payload.scores && typeof payload.scores === 'object' && !Array.isArray(payload.scores)) ? payload.scores : payload) : null;
         if (!scores) throw new Error('Formato JSON inválido');
-        Object.entries(scores).forEach(([gameId, rawScore]) => { const parsed = parseScore(rawScore); if (!parsed) return; state.scores[gameId] = parsed; persistScore(gameId, parsed); });
+        MATCHES.forEach((match) => {
+          const rawScore = Object.values(scores).find((entry) =>
+            entry
+            && typeof entry === 'object'
+            && teamKey(entry.homeTeam, entry.awayTeam) === teamKey(match.home.name, match.away.name)
+          );
+          if (!rawScore) return;
+          const parsed = parseScore(rawScore);
+          if (!parsed) return;
+          state.scores[match.id] = parsed;
+          state.scores[teamKey(match.home.name, match.away.name)] = parsed;
+          persistScore(match.id, parsed);
+        });
         updateLastSync(new Date().toLocaleString('pt-BR'));
         setApiState('online', 'Placares recebidos com sucesso pela API. Atualização automática a cada 60 segundos.');
       } catch (error) {
