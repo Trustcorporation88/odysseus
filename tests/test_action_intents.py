@@ -54,3 +54,35 @@ def test_router_reports_non_calendar_categories():
     assert classify_tool_intent("reply to that email").category == "email"
     assert classify_tool_intent("open my calendar").category == "ui"
     assert classify_tool_intent("research cost effective local models").category == "research"
+
+
+def test_analyze_email_requests_promote_to_agent():
+    assert message_needs_tools("analyze my emails from today and give me a briefing")
+    assert message_needs_tools("summarize my inbox")
+    intent = classify_tool_intent("analyze my emails from today and give me a briefing")
+    assert intent.needs_tools
+    assert intent.category == "email"
+
+
+def test_portuguese_email_requests_promote_to_agent():
+    prompt = (
+        "Analise meus emails de hoje na conta conectada e produza um briefing "
+        "executivo em português. Separe por prioridade e destaque mensagens críticas."
+    )
+    assert message_needs_tools(prompt)
+    intent = classify_tool_intent(prompt)
+    assert intent.needs_tools
+    assert intent.category == "email"
+
+    assert message_needs_tools("verifique minha caixa de entrada")
+    assert message_needs_tools("liste meus e-mails não lidos")
+    assert message_needs_tools("resuma os emails de hoje")
+    assert message_needs_tools("responda aquele email")
+
+
+def test_portuguese_explanatory_email_questions_stay_plain_chat():
+    assert not message_needs_tools("Como faço para analisar meus emails?")
+    assert not message_needs_tools("Me explica como funciona a caixa de entrada")
+    intent = classify_tool_intent("Como faço para analisar meus emails?")
+    assert not intent.needs_tools
+    assert intent.reason == "explanatory feature question"

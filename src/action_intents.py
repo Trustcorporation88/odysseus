@@ -36,8 +36,23 @@ _CALENDAR_ACTION = (
 )
 _CALENDAR_THING = r"(?:calendar|calendar\s+(?:entry|item)|event|meeting|appointment|entry|call)"
 _EXPLANATORY_PREFIX = re.compile(
-    r"^\s*(?:how\s+(?:do|can)\s+i|can\s+you\s+explain|what\s+about|tell\s+me\s+how|show\s+me\s+how)\b",
+    r"^\s*(?:how\s+(?:do|can)\s+i|can\s+you\s+explain|what\s+about|tell\s+me\s+how|show\s+me\s+how|"
+    r"como\s+(?:eu\s+)?(?:faço|faco|posso)|me\s+explica|explique\s+(?:como|o\s+que)|"
+    r"o\s+que\s+(?:é|e)\s+|como\s+funciona)\b",
     re.I,
+)
+
+# Portuguese email/inbox nouns and action verbs (pt-BR).
+_PT_EMAIL = (
+    r"(?:emails?|e-mails?|mensagens?(?:\s+de\s+email)?|correios?|inbox|"
+    r"caixa\s+de\s+entrada|correio\s+eletr[oô]nico)"
+)
+_PT_EMAIL_ACTION = (
+    r"(?:analise|analisar|analisa|verifique|verificar|revise|revisar|"
+    r"resuma|resumir|liste|listar|mostre|mostrar|leia|ler|"
+    r"confira|conferir|cheque|checar|veja|ver|"
+    r"envie|enviar|mande|mandar|escreva|escrever|responda|responder|"
+    r"arquive|arquivar|apague|apagar|exclua|excluir|marque|marcar)"
 )
 
 _PANEL = (
@@ -76,6 +91,15 @@ _ROUTING_PATTERNS: tuple[tuple[str, str, Pattern[str]], ...] = tuple(
         ("email", "email contact request", r"\bemail\s+\w+\b"),
         ("email", "check inbox request", r"\bcheck\s+(?:my\s+)?(?:email|inbox|mail)\b"),
         ("email", "unread email request", r"\bunread\s+(?:email|mail)s?\b"),
+        ("email", "analyze/summarize email request", r"\b(?:analyze|analyse|summarize|summarise|review|list|read|scan)\b.{0,80}\b(?:my\s+)?(?:emails?|mail|inbox|messages?)\b"),
+        ("email", "email briefing request", r"\b(?:email|inbox|mail)\s+briefing\b|\bbriefing\b.{0,40}\b(?:emails?|mail|inbox|messages?)\b"),
+
+        # Portuguese email actions (pt-BR).
+        ("email", "portuguese email action request", rf"\b{_PT_EMAIL_ACTION}\b.{{0,80}}\b(?:meus?|minhas?|os|as|meu|minha)?\s*{_PT_EMAIL}\b"),
+        ("email", "portuguese check inbox request", rf"\b(?:verifique|verificar|confira|conferir|cheque|checar|veja|ver)\s+(?:meu|minha|a|o)?\s*(?:caixa\s+de\s+entrada|inbox|email|e-mail|correio)\b"),
+        ("email", "portuguese unread email request", rf"\b{_PT_EMAIL}\s+(?:n[aã]o\s+lidos?|por\s+ler)\b"),
+        ("email", "portuguese today email request", rf"\b{_PT_EMAIL}\s+(?:de\s+)?hoje\b"),
+        ("email", "portuguese email briefing request", r"\bbriefing\b.{0,60}\b(?:executivo|emails?|e-mails?|mensagens?|inbox|caixa)\b"),
 
         # UI/control-plane actions that should open panels or flip toggles.
         ("ui", "open/show panel request", rf"{_PLEASE}(?:open|show|bring\s+up)\s+(?:me\s+)?(?:my\s+|the\s+)?{_PANEL}\b"),
